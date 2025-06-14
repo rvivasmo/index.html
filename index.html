@@ -92,7 +92,7 @@ function girarRuleta() {
       requestAnimationFrame(animate);
     } else {
       let finalAngle = (startAngle + arc / 2) % (2 * Math.PI);
-      let index = premios.length - Math.floor((finalAngle) / arc) - 1;
+      let index = premios.length - Math.floor(finalAngle / arc) - 1;
       if (index < 0) index = premios.length - 1;
       premioObtenido = premios[index];
       mostrarResultado();
@@ -134,20 +134,17 @@ function mostrarResultado() {
     premio: premioObtenido
   };
 
-  const formData = new FormData();
-  formData.append("nombre", datos.nombre);
-  formData.append("telefono", datos.telefono);
-  formData.append("correo", datos.correo);
-  formData.append("comentarios", datos.comentarios);
-  formData.append("premio", datos.premio);
-
-  fetch("https://script.google.com/macros/s/AKfycbxoZw4c5ljLaH4cXWO6cP0RVCHfuGduAI0qUPvn1_hx7duuh5hTLN_1ioMk-gFZYP6Ipw/exec", {
+  // ENVIAR DATOS como JSON (evita e.parameter error)
+  fetch("https://script.google.com/macros/s/AKfycbxej0tPCvONxv40MSn6cP0RVCHfuGduAI0qUPvn1_hx7duuh5hTLN_1ioMk-gFZYP6Ipw/exec", {
     method: "POST",
-    body: formData
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(datos)
   })
   .then(res => res.text())
   .then(() => {
-    console.log("Datos enviados a Google Sheets");
+    console.log("Datos enviados correctamente a Google Sheets");
   })
   .catch(err => {
     console.error("Error al enviar datos:", err);
