@@ -209,58 +209,41 @@
       ctx.fill();
     }
 
-function girarRuleta() {
-  if (spinning) return;
-  
-  spinning = true;
-  btnGirar.disabled = true;
-  btnGirar.textContent = "Girando...";
+ function girarRuleta() {
+      if (spinning) return;
+      
+      spinning = true;
+      btnGirar.disabled = true;
+      btnGirar.textContent = "Girando...";
 
-  // 1. Primero decidir QUÉ premio mostrar (antes de girar)
-  contadorTiradas++;
-  const esPremioGarantizado = contadorTiradas % 50 === 0;
-  
-  let index;
-  if (esPremioGarantizado) {
-    // Seleccionar solo entre premios principales
-    index = Math.floor(Math.random() * premiosPrincipales.length);
-  } else {
-    // Selección normal
-    index = Math.floor(Math.random() * todosPremios.length);
-  }
+      let angle = Math.random() * 720 + 720; // 4 vueltas completas + aleatorio
+      let current = 0;
+      let duration = 4000;
+      const start = performance.now();
 
-  // 2. Calcular el ángulo EXACTO donde está ese premio
-  const anguloObjetivo = (index * arc) + (arc/2);
-  
-  // 3. Hacer girar la ruleta HACIA ese ángulo específico
-  let angle = (4 * 2 * Math.PI) + anguloObjetivo; // 4 vueltas + ángulo objetivo
-  let current = 0;
-  let duration = 4000;
-  const start = performance.now();
+      function animate(time) {
+        let elapsed = time - start;
+        if (elapsed < duration) {
+          current = easeOut(elapsed, 0, angle, duration);
+          startAngle = (current * Math.PI / 180) % (2 * Math.PI);
+          dibujarRuleta();
+          requestAnimationFrame(animate);
+        } else {
+          spinning = false;
+          btnGirar.disabled = false;
+          btnGirar.textContent = "🎯 Girar la ruleta";
+          
+          let finalAngle = (startAngle + arc / 2) % (2 * Math.PI);
+          let index = todosPremios.length - Math.floor(finalAngle / arc) - 1;
+          if (index < 0) index = todosPremios.length - 1;
+          premioObtenido = todosPremios[index];
+          mostrarResultado();
+        }
+      }
 
-  function animate(time) {
-    let elapsed = time - start;
-    if (elapsed < duration) {
-      current = easeOut(elapsed, 0, angle, duration);
-      startAngle = (current * Math.PI / 180) % (2 * Math.PI);
-      dibujarRuleta();
       requestAnimationFrame(animate);
-    } else {
-      spinning = false;
-      btnGirar.disabled = false;
-      btnGirar.textContent = "🎯 Girar la ruleta";
-      
-      // Asegurar que termina en la posición exacta
-      startAngle = -anguloObjetivo;
-      dibujarRuleta();
-      
-      premioObtenido = todosPremios[index];
-      mostrarResultado();
     }
-  }
 
-  requestAnimationFrame(animate);
-}
 
     function easeOut(t, b, c, d) {
       t /= d;
