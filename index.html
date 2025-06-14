@@ -210,39 +210,40 @@
     }
 
 function girarRuleta() {
-  if (spinning) return;
-  
-  spinning = true;
-  btnGirar.disabled = true;
-  btnGirar.textContent = "Girando...";
-
-  let angle = Math.random() * 360 + 720; // 2 vueltas completas + aleatorio
-  let current = 0;
-  let duration = 3000;
-  const start = performance.now();
-
-  function animate(time) {
-    let elapsed = time - start;
-    if (elapsed < duration) {
-      current = easeOut(elapsed, 0, angle, duration);
-      startAngle = (current * Math.PI / 180) % (2 * Math.PI);
-      dibujarRuleta();
-      requestAnimationFrame(animate);
-    } else {
-      spinning = false;
-      btnGirar.disabled = false;
-      btnGirar.textContent = "🎯 Girar la ruleta";
+      if (spinning) return;
       
-      // Esta es la parte corregida para calcular correctamente el índice
-      let finalAngle = (startAngle + arc / 2) % (2 * Math.PI);
-      let index = Math.floor((2 * Math.PI - finalAngle) / arc) % todosPremios.length;
-      premioObtenido = todosPremios[index];
-      mostrarResultado();
-    }
-  }
+      spinning = true;
+      btnGirar.disabled = true;
+      btnGirar.textContent = "Girando...";
 
-  requestAnimationFrame(animate);
-}
+      let angle = Math.random() * 360 + 720; // 2 vueltas completas + aleatorio
+      let current = 0;
+      let duration = 3000;
+      const start = performance.now();
+
+      function animate(time) {
+        let elapsed = time - start;
+        if (elapsed < duration) {
+          current = easeOut(elapsed, 0, angle, duration);
+          startAngle = (current * Math.PI / 180) % (2 * Math.PI);
+          dibujarRuleta();
+          requestAnimationFrame(animate);
+        } else {
+          spinning = false;
+          btnGirar.disabled = false;
+          btnGirar.textContent = "🎯 Girar la ruleta";
+          
+          let finalAngle = (startAngle + arc / 2) % (2 * Math.PI);
+          let index = todosPremios.length - Math.floor(finalAngle / arc) - 1;
+          if (index < 0) index = todosPremios.length - 1;
+          premioObtenido = todosPremios[index];
+          mostrarResultado();
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
 
     function easeOut(t, b, c, d) {
       t /= d;
