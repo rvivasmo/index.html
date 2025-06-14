@@ -112,6 +112,14 @@
         <label for="telefono">Teléfono:</label>
         <input type="tel" id="telefono" placeholder="Número de teléfono" required>
       </div>
+      <div class="form-group">
+        <label for="correo">Correo electrónico:</label>
+        <input type="email" id="correo" placeholder="tu@email.com" required>
+      </div>
+      <div class="form-group">
+        <label for="comentarios">Comentarios (opcional):</label>
+        <textarea id="comentarios" placeholder="Déjanos tus comentarios..." rows="3"></textarea>
+      </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
 
@@ -264,16 +272,24 @@
     function enviarFormulario() {
       const nombre = document.getElementById("nombre").value.trim();
       const telefono = document.getElementById("telefono").value.trim();
+      const correo = document.getElementById("correo").value.trim();
+      const comentarios = document.getElementById("comentarios").value.trim();
 
-      if (!nombre || !telefono) {
+      if (!nombre || !telefono || !correo) {
         alert("Por favor, completa todos los campos requeridos.");
+        return;
+      }
+
+      // Validación básica de email
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+        alert("Por favor, ingresa un correo electrónico válido.");
         return;
       }
 
       btnEnviar.disabled = true;
       btnEnviar.textContent = "Enviando...";
 
-      window.datosUsuario = { nombre, telefono };
+      window.datosUsuario = { nombre, telefono, correo, comentarios };
       
       // Simulamos un pequeño retraso para mejor UX
       setTimeout(() => {
@@ -311,6 +327,8 @@
       const datos = {
         nombre: window.datosUsuario.nombre,
         telefono: window.datosUsuario.telefono,
+        correo: window.datosUsuario.correo,
+        comentarios: window.datosUsuario.comentarios || "",
         premio: premioObtenido.texto,
         descripcion: premioObtenido.descripcion || "",
         fecha: new Date().toISOString()
