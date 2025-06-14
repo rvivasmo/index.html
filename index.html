@@ -112,14 +112,6 @@
         <label for="telefono">Teléfono:</label>
         <input type="tel" id="telefono" placeholder="Número de teléfono" required>
       </div>
-      <div class="form-group">
-        <label for="correo">Correo electrónico:</label>
-        <input type="email" id="correo" placeholder="tu@email.com" required>
-      </div>
-      <div class="form-group">
-        <label for="comentarios">Comentarios (opcional):</label>
-        <textarea id="comentarios" placeholder="Déjanos tus comentarios..." rows="3"></textarea>
-      </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
 
@@ -152,12 +144,7 @@
       { texto: "📦 Regalo extraviado… sigue participando", color: "#D4A5A5" },
       { texto: "🎉 ¡Uy! Lo envolvimos… pero no te tocó", color: "#FF9AA2" },
       { texto: "✨ No hay premio, pero sí buena vibra ✨", color: "#FFB7B2" },
-      { texto: "🎂 Este espacio está lleno de nada (pero con cariño)", color: "#C7CEEA" },
-      { texto: "💘 Te salió un abrazo imaginario 💕", color: "#F8C3CD" },
-      { texto: "🧨 Explosión de suerte... cancelada", color: "#FFD166" },
-      { texto: "📮 Suerte para la próxima, sigue girando", color: "#06D6A0" },
-      { texto: "🪄 Tu suerte está tomando forma... pero no ahora", color: "#118AB2" },
-      { texto: "📷 Ni con foto del regalo ganabas esta vez", color: "#EF476F" }
+      { texto: "🎂 Este espacio está lleno de nada (pero con cariño)", color: "#C7CEEA" }
     ];
 
     // Combinamos todos los premios (5 principales + 15 mensajes)
@@ -235,9 +222,9 @@
       btnGirar.disabled = true;
       btnGirar.textContent = "Girando...";
 
-      let angle = Math.random() * 360 + 720; // 2 vueltas completas + aleatorio
+      let angle = Math.random() * 720 + 720; // 4 vueltas completas + aleatorio
       let current = 0;
-      let duration = 3000;
+      let duration = 4000;
       const start = performance.now();
 
       function animate(time) {
@@ -272,24 +259,16 @@
     function enviarFormulario() {
       const nombre = document.getElementById("nombre").value.trim();
       const telefono = document.getElementById("telefono").value.trim();
-      const correo = document.getElementById("correo").value.trim();
-      const comentarios = document.getElementById("comentarios").value.trim();
 
-      if (!nombre || !telefono || !correo) {
+      if (!nombre || !telefono) {
         alert("Por favor, completa todos los campos requeridos.");
-        return;
-      }
-
-      // Validación básica de email
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
-        alert("Por favor, ingresa un correo electrónico válido.");
         return;
       }
 
       btnEnviar.disabled = true;
       btnEnviar.textContent = "Enviando...";
 
-      window.datosUsuario = { nombre, telefono, correo, comentarios };
+      window.datosUsuario = { nombre, telefono };
       
       // Simulamos un pequeño retraso para mejor UX
       setTimeout(() => {
@@ -327,8 +306,6 @@
       const datos = {
         nombre: window.datosUsuario.nombre,
         telefono: window.datosUsuario.telefono,
-        correo: window.datosUsuario.correo,
-        comentarios: window.datosUsuario.comentarios || "",
         premio: premioObtenido.texto,
         descripcion: premioObtenido.descripcion || "",
         fecha: new Date().toISOString()
