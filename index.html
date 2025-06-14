@@ -127,7 +127,7 @@
     <div id="mensajeFinal"></div>
   </div>
 
- <script>
+<script>
     // Premios principales (solo aparecerán cada 100 giros)
     const premiosPrincipales = [
       { texto: "¡Ganaste un peluche!", color: "#FFC0CB" },
@@ -156,10 +156,31 @@
       { texto: "📷 Ni con foto ganas esta vez", color: "#DDA0DD" }
     ];
 
-    // Ruleta normal (solo mensajes "no ganó")
-    const ruletaNormal = [...premiosPrincipales, ...mensajesNoGano];
+    // Función para mezclar los premios principales entre los mensajes "no ganó"
+    function mezclarPremios() {
+      // Copiamos los arrays para no modificar los originales
+      const mensajes = [...mensajesNoGano];
+      const premios = [...premiosPrincipales];
+      
+      // Calculamos cada cuántos mensajes debe ir un premio principal
+      const intervalo = Math.floor(mensajes.length / premios.length);
+      
+      // Insertamos los premios principales en posiciones aleatorias dentro de intervalos
+      for (let i = 0; i < premios.length; i++) {
+        const min = i * intervalo;
+        const max = (i + 1) * intervalo;
+        const posicion = Math.floor(Math.random() * (max - min)) + min;
+        
+        mensajes.splice(posicion, 0, premios[i]);
+      }
+      
+      return mensajes;
+    }
+
+    // Ruleta normal (con premios principales mezclados)
+    const ruletaNormal = mezclarPremios();
     // Todos los premios (para cuando sea premio forzado)
-    const todosPremios = [...premiosPrincipales, ...mensajesNoGano];
+    const todosPremios = [...ruletaNormal]; // Ahora ya incluye todo mezclado
     
     // Contador de giros (persistente)
     let contadorGiros = localStorage.getItem('contadorGiros') ? parseInt(localStorage.getItem('contadorGiros')) : 0;
@@ -182,13 +203,13 @@
         canvas.width = 400;
         canvas.height = 400;
       }
-      dibujarRuleta(ruletaNormal); // Dibuja ruleta normal por defecto
+      dibujarRuleta(ruletaNormal); // Dibuja ruleta normal con premios mezclados
     }
 
     window.addEventListener('resize', ajustarCanvas);
     ajustarCanvas();
 
-    // Función para dibujar la ruleta (ahora acepta parámetros)
+    // Función para dibujar la ruleta
     function dibujarRuleta(premios = ruletaNormal, arcParam = arc) {
       const size = canvas.width;
       const cx = size / 2;
@@ -227,72 +248,72 @@
       ctx.fill();
     }
 
-function girarRuleta() {
-  if (spinning) return;
-  
-  spinning = true;
-  btnGirar.disabled = true;
-  btnGirar.textContent = "Girando...";
-
-  // Incrementar contador
-  contadorGiros++;
-  localStorage.setItem('contadorGiros', contadorGiros);
-
-  // Determinar si es el giro 100 (premio forzado)
-  const esPremioForzado = contadorGiros % 100 === 0;
-  
-  let angle;
-  if (esPremioForzado) {
-    // Forzar ángulo para premio principal
-    const indicePremio = Math.floor(Math.random() * premiosPrincipales.length);
-    const posicionPremio = todosPremios.findIndex(p => p.texto === premiosPrincipales[indicePremio].texto);
-    angle = (posicionPremio * arc + arc/2) * (180/Math.PI);
-    angle += 720 * 5; // Vueltas extras para animación
-  } else {
-    // Girar normalmente, pero solo considerar mensajesNoGano
-    const indicesNoGano = todosPremios
-      .map((premio, index) => mensajesNoGano.some(m => m.texto === premio.texto) ? index : -1)
-      .filter(index => index !== -1);
-    
-    const indiceAleatorio = indicesNoGano[Math.floor(Math.random() * indicesNoGano.length)];
-    angle = (indiceAleatorio * arc + arc/2) * (180/Math.PI);
-    angle += Math.random() * 720 + 720; // Animación normal
-  }
-
-  let current = 0;
-  let duration = 4000;
-  const start = performance.now();
-
-  function animate(time) {
-    let elapsed = time - start;
-    if (elapsed < duration) {
-      current = easeOut(elapsed, 0, angle, duration);
-      startAngle = (current * Math.PI / 180) % (2 * Math.PI);
-      dibujarRuleta();
-      requestAnimationFrame(animate);
-    } else {
-      spinning = false;
-      btnGirar.disabled = false;
-      btnGirar.textContent = "🎯 Girar la ruleta";
+    function girarRuleta() {
+      if (spinning) return;
       
-      let finalAngle = (startAngle + arc / 2) % (2 * Math.PI);
-      let index = todosPremios.length - Math.floor(finalAngle / arc) - 1;
-      if (index < 0) index = todosPremios.length - 1;
+      spinning = true;
+      btnGirar.disabled = true;
+      btnGirar.textContent = "Girando...";
+
+      // Incrementar contador
+      contadorGiros++;
+      localStorage.setItem('contadorGiros', contadorGiros);
+
+      // Determinar si es el giro 100 (premio forzado)
+      const esPremioForzado = contadorGiros % 100 === 0;
       
-      // Si NO es premio forzado, asegurar que sea un mensaje "no ganó"
-      if (!esPremioForzado) {
-        while (premiosPrincipales.some(p => p.texto === todosPremios[index].texto)) {
-          index = (index + 1) % todosPremios.length; // Buscar siguiente opción válida
+      let angle;
+      if (esPremioForzado) {
+        // Forzar ángulo para premio principal
+        const indicePremio = Math.floor(Math.random() * premiosPrincipales.length);
+        const posicionPremio = todosPremios.findIndex(p => p.texto === premiosPrincipales[indicePremio].texto);
+        angle = (posicionPremio * arc + arc/2) * (180/Math.PI);
+        angle += 720 * 5; // Vueltas extras para animación
+      } else {
+        // Girar normalmente, pero solo considerar mensajesNoGano
+        const indicesNoGano = todosPremios
+          .map((premio, index) => mensajesNoGano.some(m => m.texto === premio.texto) ? index : -1)
+          .filter(index => index !== -1);
+        
+        const indiceAleatorio = indicesNoGano[Math.floor(Math.random() * indicesNoGano.length)];
+        angle = (indiceAleatorio * arc + arc/2) * (180/Math.PI);
+        angle += Math.random() * 720 + 720; // Animación normal
+      }
+
+      let current = 0;
+      let duration = 4000;
+      const start = performance.now();
+
+      function animate(time) {
+        let elapsed = time - start;
+        if (elapsed < duration) {
+          current = easeOut(elapsed, 0, angle, duration);
+          startAngle = (current * Math.PI / 180) % (2 * Math.PI);
+          dibujarRuleta(ruletaNormal);
+          requestAnimationFrame(animate);
+        } else {
+          spinning = false;
+          btnGirar.disabled = false;
+          btnGirar.textContent = "🎯 Girar la ruleta";
+          
+          let finalAngle = (startAngle + arc / 2) % (2 * Math.PI);
+          let index = todosPremios.length - Math.floor(finalAngle / arc) - 1;
+          if (index < 0) index = todosPremios.length - 1;
+          
+          // Si NO es premio forzado, asegurar que sea un mensaje "no ganó"
+          if (!esPremioForzado) {
+            while (premiosPrincipales.some(p => p.texto === todosPremios[index].texto)) {
+              index = (index + 1) % todosPremios.length; // Buscar siguiente opción válida
+            }
+          }
+          
+          premioObtenido = todosPremios[index];
+          mostrarResultado();
         }
       }
-      
-      premioObtenido = todosPremios[index];
-      mostrarResultado();
-    }
-  }
 
-  requestAnimationFrame(animate);
-}
+      requestAnimationFrame(animate);
+    }
 
     // Función para actualizar el contador en la interfaz
     function actualizarContador() {
@@ -309,7 +330,6 @@ function girarRuleta() {
       return c*(t*t*t + 1) + b;
     }
 
-    // Resto del código (sin cambios)
     function enviarFormulario() {
       const nombre = document.getElementById("nombre").value.trim();
       const telefono = document.getElementById("telefono").value.trim();
@@ -358,7 +378,7 @@ function girarRuleta() {
         telefono: window.datosUsuario.telefono,
         premio: premioObtenido.texto,
         fecha: new Date().toISOString(),
-        contadorGiros: contadorGiros // Enviamos el contador al servidor
+        contadorGiros: contadorGiros
       };
 
       const params = new URLSearchParams();
