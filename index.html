@@ -106,7 +106,7 @@
     <div id="formulario">
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" placeholder="Nombre de Usuario." required>
+        <input type="text" id="nombre" placeholder="Nombre de Usuario.." required>
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono:</label>
@@ -181,23 +181,15 @@
     window.addEventListener('resize', ajustarCanvas);
     ajustarCanvas();
 
-    function dibujarRuleta() {
-    // 1. Configuración de tamaño (ejemplo: canvas de 600x600 px)
-    const canvas = document.getElementById("miCanvas"); // Asegúrate de que el canvas existe
-    canvas.width = 600;  // Nuevo ancho (más grande)
-    canvas.height = 600; // Nuevo alto (más grande)
-    
-    const size = canvas.width; // Ahora será 600 px
-    const cx = size / 2;       // Centro X (300 px)
-    const cy = size / 2;       // Centro Y (300 px)
-    const radio = size / 2 - 20; // Radio más grande (280 px, con margen de 20 px)
+   function dibujarRuleta() {
+      const size = canvas.width;
+      const cx = size / 2;
+      const cy = size / 2;
+      const radio = size / 2 - 10;
 
-    // Limpiar el canvas
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, size, size);
-    
-    // Dibujar segmentos
-    for (let i = 0; i < todosPremios.length; i++) {
+      ctx.clearRect(0, 0, size, size);
+      
+      for (let i = 0; i < todosPremios.length; i++) {
         const angle = startAngle + i * arc;
         ctx.beginPath();
         ctx.fillStyle = todosPremios[i].color;
@@ -205,29 +197,28 @@
         ctx.arc(cx, cy, radio, angle, angle + arc);
         ctx.fill();
 
-        // Texto en los segmentos (con fuente más grande)
         ctx.save();
         ctx.translate(cx, cy);
         ctx.rotate(angle + arc / 2);
         ctx.textAlign = "right";
         ctx.fillStyle = "#fff";
         
-        // Ajustar tamaño de fuente (ahora más grande)
-        const fontSize = size / (todosPremios[i].texto.length > 30 ? 25 : 30); // Antes era 35
-        ctx.font = `bold ${fontSize}px sans-serif`;
+        // Ajustar tamaño de fuente según la longitud del texto
+        const fontSize = size / (todosPremios[i].texto.length > 20 ? 35 : 35);
+        ctx.font = "bold " + fontSize + "px sans-serif";
         
-        ctx.fillText(todosPremios[i].texto, radio - 20, 15); // Ajuste de posición
+        ctx.fillText(todosPremios[i].texto, radio - 10, 10);
         ctx.restore();
-    }
+      }
 
-    // Dibujar puntero (más grande y mejor posicionado)
-    ctx.beginPath();
-    ctx.fillStyle = "#000";
-    ctx.moveTo(cx, 20);                   // Posición Y más abajo (antes era 10)
-    ctx.lineTo(cx - 15, 50);              // Líneas más largas (antes 10 y 30)
-    ctx.lineTo(cx + 15, 50);
-    ctx.fill();
-}
+      // Dibujar puntero
+      ctx.beginPath();
+      ctx.fillStyle = "#000";
+      ctx.moveTo(cx, 10);
+      ctx.lineTo(cx - 10, 30);
+      ctx.lineTo(cx + 10, 30);
+      ctx.fill();
+    }
 
     function girarRuleta() {
       if (spinning) return;
