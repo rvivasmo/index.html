@@ -181,7 +181,7 @@ function mostrarResultado() {
     premio: premioObtenido
   };
 
-fetch("https://script.google.com/macros/s/AKfycbwGeiWwjsWmnT6vzGK-BcFMrd56tokfcZ7LWKvLROghZt_Gy2yQyNCx4R-9FDhqGcvd/exec", {
+fetch("https://script.google.com/macros/s/AKfycbwGeiWwjsWmnT6vzGK-BcFMrd56tokfcZ7LWKvLROghZt_Gy2yQyNCx4R-9FDhqGcvd/exec?nombre=Test&telefono=123&correo=test@test.com&premio=Prueba", {
   method: "POST",
   body: new URLSearchParams({
     nombre: datos.nombre,
