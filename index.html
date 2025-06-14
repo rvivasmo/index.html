@@ -106,7 +106,7 @@
     <div id="formulario">
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" placeholder="Nombre de Usuario." required>
+        <input type="text" id="nombre" placeholder="Nombre de Usuario.." required>
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono:</label>
@@ -204,7 +204,7 @@
         ctx.fillStyle = "#fff";
         
         // Ajustar tamaño de fuente según la longitud del texto
-        const fontSize = size / (todosPremios[i].texto.length > 30 ? 25 : 25);
+        const fontSize = size / (todosPremios[i].texto.length > 30 ? 35 : 35);
         ctx.font = "bold " + fontSize + "px sans-serif";
         
         ctx.fillText(todosPremios[i].texto, radio - 10, 10);
