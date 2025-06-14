@@ -233,11 +233,13 @@
           btnGirar.disabled = false;
           btnGirar.textContent = "🎯 Girar la ruleta";
           
-          let finalAngle = (startAngle + arc / 2) % (2 * Math.PI);
-          let index = todosPremios.length - Math.floor(finalAngle / arc) - 1;
-          if (index < 0) index = todosPremios.length - 1;
+          // Cálculo corregido del premio ganador
+          let normalizedAngle = (360 - (current % 360)) * Math.PI / 180;
+          let index = Math.floor(normalizedAngle / arc) % todosPremios.length;
           premioObtenido = todosPremios[index];
-          mostrarResultado();
+          
+          // Pequeño retraso para mejor UX
+          setTimeout(mostrarResultado, 500);
         }
       }
 
@@ -256,6 +258,12 @@
 
       if (!nombre || !telefono) {
         alert("Por favor, completa todos los campos requeridos.");
+        return;
+      }
+
+      // Validación adicional del teléfono
+      if (!/^[0-9]{10,15}$/.test(telefono)) {
+        alert("Por favor ingresa un número de teléfono válido (solo números, 10-15 dígitos)");
         return;
       }
 
