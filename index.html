@@ -157,7 +157,7 @@
 
     // Ajustar canvas para dispositivos móviles
     function ajustarCanvas() {
-      if (window.innerWidth <= 500) {
+      if (window.innerWidth <= 100) {
         canvas.width = 300;
         canvas.height = 300;
       } else {
@@ -218,7 +218,7 @@
 
       let angle = Math.random() * 720 + 720; // 4 vueltas completas + aleatorio
       let current = 0;
-      let duration = 4000;
+      let duration = 3000;
       const start = performance.now();
 
       function animate(time) {
