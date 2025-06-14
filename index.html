@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ruleta de Premios PD</title>
+  <title>Formulario y Ruleta de Premios PD</title>
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -25,33 +25,44 @@
       margin-bottom: 20px;
       text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
     }
-    #ruletaContainer {
-      position: relative;
-      margin: 20px auto;
+    #formulario, #ruletaContainer, #mensajeFinal {
+      display: none;
+      background-color: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
     }
-    canvas {
-      border: 8px solid #e91e63;
-      border-radius: 50%;
-      background-color: #fff;
-      box-shadow: 0 10px 20px rgba(233,30,99,0.2);
-      max-width: 100%;
+    #formulario {
+      display: block;
     }
-    #pointer {
-      position: absolute;
-      top: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 0;
-      border-left: 20px solid transparent;
-      border-right: 20px solid transparent;
-      border-top: 40px solid #e91e63;
-      z-index: 10;
+    .form-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #e91e63;
+      font-weight: bold;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ffc1d5;
+      border-radius: 10px;
+      font-size: 16px;
+      box-sizing: border-box;
+      transition: border 0.3s ease;
+    }
+    input:focus, textarea:focus {
+      border-color: #e91e63;
+      outline: none;
     }
     button {
       padding: 12px 30px;
       font-size: 18px;
-      margin-top: 20px;
+      margin-top: 15px;
       background-color: #e91e63;
       color: white;
       border: none;
@@ -72,28 +83,43 @@
       box-shadow: none;
       cursor: not-allowed;
     }
-    #resultado {
-      margin-top: 30px;
-      padding: 20px;
-      background-color: white;
-      border-radius: 15px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      display: none;
+    #ruletaContainer {
+      position: relative;
     }
-    .premio {
+    #ruleta {
+      border: 8px solid #e91e63;
+      border-radius: 50%;
+      background-color: #fff;
+      box-shadow: 0 10px 20px rgba(233,30,99,0.2);
+      max-width: 100%;
+    }
+    #pointer {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-top: 40px solid #e91e63;
+      z-index: 10;
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+    }
+    .premio-ganado {
       font-size: 24px;
       color: #e91e63;
       font-weight: bold;
       margin-bottom: 10px;
     }
-    .descripcion {
+    .descripcion-premio {
       font-size: 16px;
       color: #666;
     }
     @media (max-width: 500px) {
-      canvas {
-        width: 300px;
-        height: 300px;
+      #ruleta {
+        width: 280px;
+        height: 280px;
       }
       h2 {
         font-size: 20px;
@@ -103,109 +129,128 @@
 </head>
 <body>
   <div class="container">
-    <h2>🎡 Gira la Ruleta y Descubre tu Premio 🎡</h2>
-    
+    <h2>💖 Participa y Gira la Ruleta PD 💖</h2>
+
+    <!-- Formulario Inicial -->
+    <div id="formulario">
+      <div class="form-group">
+        <label for="nombre">Nombre completo:</label>
+        <input type="text" id="nombre" placeholder="Tu nombre" required>
+      </div>
+      <div class="form-group">
+        <label for="telefono">Teléfono:</label>
+        <input type="tel" id="telefono" placeholder="Número de contacto" required>
+      </div>
+      <div class="form-group">
+        <label for="correo">Correo electrónico:</label>
+        <input type="email" id="correo" placeholder="tu@email.com" required>
+      </div>
+      <div class="form-group">
+        <label for="comentarios">Comentarios (opcional):</label>
+        <textarea id="comentarios" rows="3" placeholder="Déjanos tus comentarios..."></textarea>
+      </div>
+      <button id="btnEnviar" onclick="enviarFormulario()">Enviar y Girar Ruleta</button>
+    </div>
+
+    <!-- Ruleta -->
     <div id="ruletaContainer">
       <div id="pointer"></div>
-      <canvas id="ruleta" width="400" height="400"></canvas>
+      <canvas id="ruleta"></canvas>
+      <button id="btnGirar" onclick="girarRuleta()">🎯 Girar Ruleta</button>
     </div>
-    
-    <button id="btnGirar" onclick="girarRuleta()">🎯 Girar Ruleta</button>
-    
-    <div id="resultado">
-      <div class="premio" id="textoPremio"></div>
-      <div class="descripcion" id="textoDescripcion"></div>
+
+    <!-- Mensaje Final -->
+    <div id="mensajeFinal">
+      <div class="premio-ganado" id="textoPremio"></div>
+      <div class="descripcion-premio" id="textoDescripcion"></div>
     </div>
   </div>
 
   <script>
-    // Premios principales (secciones grandes)
+    // Datos del usuario
+    let datosUsuario = {};
+    
+    // Configuración de premios
     const premiosPrincipales = [
       {
         texto: "🧸 ¡Ganaste un peluche!",
         descripcion: "Solo redimible en tienda. Aplican términos y condiciones.",
-        color: "#FF9FF3"
+        color: "#FF9FF3",
+        esPremio: true
       },
       {
         texto: "🍽 ¡Desayuno sorpresa!",
         descripcion: "Aplican condiciones. Válido por 30 días.",
-        color: "#FECA57"
+        color: "#FECA57",
+        esPremio: true
       },
       {
         texto: "🎉 Bono de $30.000",
         descripcion: "Para comprar lo que quieras. Válido solo en tienda.",
-        color: "#FF6B6B"
+        color: "#FF6B6B",
+        esPremio: true
       },
       {
         texto: "🎈 Bono de $20.000",
         descripcion: "En regalos y sorpresas. Redención en punto físico.",
-        color: "#48DBFB"
+        color: "#48DBFB",
+        esPremio: true
       },
       {
         texto: "💝 Bono de $10.000",
         descripcion: "Para usar en tu próxima compra. No acumulable.",
-        color: "#1DD1A1"
+        color: "#1DD1A1",
+        esPremio: true
       }
     ];
 
-    // Mensajes divertidos para "no ganó" (secciones más pequeñas)
     const mensajesNoGano = [
-      "🎀 Te hace falta un moño... ¡pero casi ganas!",
-      "🎈 Ni con globo, ni con moño... vuelve a intentarlo",
-      "🧸 El peluche te vio... y se escondió 😅",
-      "💌 No ganaste, pero somos tu fan",
-      "🎁 Tu regalo viene en camino... pero no hoy 😬",
-      "🛍 Este intento no trae sorpresa, ¡pero no te rindas!",
-      "📦 Regalo extraviado... sigue participando",
-      "🎉 ¡Uy! Lo envolvimos... pero no te tocó",
-      "✨ No hay premio, pero sí buena vibra ✨",
-      "🎂 Este espacio está lleno de nada (pero con cariño)",
-      "💘 Te salió un abrazo imaginario 💕",
-      "🧨 Explosión de suerte... cancelada",
-      "📮 Suerte para la próxima, sigue girando",
-      "🪄 Tu suerte está tomando forma... pero no ahora",
-      "📷 Ni con foto del regalo ganabas esta vez"
+      { texto: "🎀 Te hace falta un moño... ¡pero casi ganas!", color: "#F9D5E5" },
+      { texto: "🎈 Ni con globo, ni con moño... vuelve a intentarlo", color: "#E3EAA7" },
+      { texto: "🧸 El peluche te vio... y se escondió 😅", color: "#B2E2E2" },
+      { texto: "💌 No ganaste, pero somos tu fan", color: "#FFB347" },
+      { texto: "🎁 Tu regalo viene en camino... pero no hoy 😬", color: "#A2C8CC" },
+      { texto: "🛍 Este intento no trae sorpresa, ¡pero no te rindas!", color: "#FFD3B6" },
+      { texto: "📦 Regalo extraviado... sigue participando", color: "#D4A5A5" },
+      { texto: "🎉 ¡Uy! Lo envolvimos... pero no te tocó", color: "#FF9AA2" },
+      { texto: "✨ No hay premio, pero sí buena vibra ✨", color: "#FFB7B2" },
+      { texto: "🎂 Este espacio está lleno de nada (pero con cariño)", color: "#C7CEEA" }
     ];
 
-    // Combinamos todos los premios (5 principales + 15 mensajes)
+    // Combinar todos los premios (5 premios grandes + 10 mensajes)
     const todosPremios = [...premiosPrincipales];
-    mensajesNoGano.forEach(msg => {
-      todosPremios.push({
-        texto: msg,
-        descripcion: "Vuelve a intentarlo en otra oportunidad",
-        color: "#D3D3D3"
-      });
-    });
+    
+    // Duplicar premios principales para hacerlos más probables
+    todosPremios.push(...premiosPrincipales.slice(0, 3));
+    
+    // Añadir mensajes
+    todosPremios.push(...mensajesNoGano);
 
-    // Configuración de la ruleta
+    // Variables de la ruleta
     const ruleta = document.getElementById("ruleta");
     const ctx = ruleta.getContext("2d");
     const btnGirar = document.getElementById("btnGirar");
+    const btnEnviar = document.getElementById("btnEnviar");
     const textoPremio = document.getElementById("textoPremio");
     const textoDescripcion = document.getElementById("textoDescripcion");
-    const resultadoDiv = document.getElementById("resultado");
     
     let anguloActual = 0;
     let girando = false;
     const tamañoSegmento = (2 * Math.PI) / todosPremios.length;
 
-    // Ajustar tamaño para móviles
-    function ajustarTamaño() {
-      if (window.innerWidth <= 500) {
-        ruleta.width = 300;
-        ruleta.height = 300;
-      } else {
-        ruleta.width = 400;
-        ruleta.height = 400;
-      }
+    // Ajustar tamaño de la ruleta
+    function ajustarRuleta() {
+      const esMovil = window.innerWidth <= 500;
+      ruleta.width = esMovil ? 300 : 400;
+      ruleta.height = esMovil ? 300 : 400;
       dibujarRuleta();
     }
 
-    // Dibujar la ruleta
+    // Dibujar ruleta
     function dibujarRuleta() {
       const centroX = ruleta.width / 2;
       const centroY = ruleta.height / 2;
-      const radio = Math.min(centroX, centroY) - 10;
+      const radio = Math.min(centroX, centroY) - 15;
       
       ctx.clearRect(0, 0, ruleta.width, ruleta.height);
       
@@ -219,51 +264,54 @@
         ctx.moveTo(centroX, centroY);
         ctx.arc(centroX, centroY, radio, anguloInicio, anguloFin);
         ctx.fill();
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 1;
+        ctx.stroke();
         
         // Texto del premio
         ctx.save();
         ctx.translate(centroX, centroY);
         ctx.rotate(anguloInicio + tamañoSegmento / 2);
         ctx.textAlign = "right";
-        ctx.fillStyle = "#fff";
+        ctx.fillStyle = premio.esPremio ? "#fff" : "#333";
         
-        // Tamaño de fuente adaptable
-        const fontSize = radio / (premio.texto.length > 20 ? 10 : 8);
+        // Ajustar tamaño de fuente según premio
+        const fontSize = premio.esPremio ? 
+          radio / 8 :  // Más grande para premios principales
+          radio / 10;  // Más pequeño para mensajes
+        
         ctx.font = `bold ${fontSize}px Arial`;
-        
-        ctx.fillText(premio.texto, radio - 15, 5);
+        ctx.fillText(premio.texto, radio - 10, 5);
         ctx.restore();
       });
       
-      // Dibujar centro
+      // Centro de la ruleta
       ctx.beginPath();
       ctx.fillStyle = "#fff";
-      ctx.arc(centroX, centroY, 15, 0, 2 * Math.PI);
+      ctx.arc(centroX, centroY, 10, 0, 2 * Math.PI);
       ctx.fill();
       ctx.strokeStyle = "#e91e63";
       ctx.lineWidth = 3;
       ctx.stroke();
     }
 
-    // Girar la ruleta
+    // Girar ruleta
     function girarRuleta() {
       if (girando) return;
       
       girando = true;
       btnGirar.disabled = true;
       btnGirar.textContent = "Girando...";
-      resultadoDiv.style.display = "none";
       
       // Configuración de la animación
-      const vueltas = 5; // Número de vueltas completas
-      const anguloFinal = Math.random() * 2 * Math.PI + (vueltas * 2 * Math.PI);
-      const duracion = 5000; // 5 segundos
+      const vueltas = 5;
+      const anguloFinal = Math.random() * (2 * Math.PI) + (vueltas * 2 * Math.PI);
+      const duracion = 4000;
       const inicio = performance.now();
       
-      function animar(timestamp) {
-        const tiempoTranscurrido = timestamp - inicio;
-        const progreso = Math.min(tiempoTranscurrido / duracion, 1);
-        const easing = Math.sin(progreso * Math.PI / 2); // Ease-out
+      function animar(tiempo) {
+        const progreso = Math.min((tiempo - inicio) / duracion, 1);
+        const easing = 1 - Math.pow(1 - progreso, 3); // Ease-out cúbico
         
         anguloActual = easing * anguloFinal;
         dibujarRuleta();
@@ -290,23 +338,74 @@
       
       // Mostrar resultado
       textoPremio.textContent = premioGanado.texto;
-      textoDescripcion.textContent = premioGanado.descripcion;
-      resultadoDiv.style.display = "block";
+      textoDescripcion.textContent = premioGanado.descripcion || "Vuelve a intentarlo en otra oportunidad";
+      document.getElementById("ruletaContainer").style.display = "none";
+      document.getElementById("mensajeFinal").style.display = "block";
       
-      // Resaltar si es premio principal
-      if (premiosPrincipales.some(p => p.texto === premioGanado.texto)) {
-        textoPremio.style.color = "#e91e63";
-        textoPremio.style.fontSize = "28px";
-      } else {
-        textoPremio.style.color = "#888";
-        textoPremio.style.fontSize = "24px";
+      // Enviar datos al servidor
+      enviarDatosAlServidor(premioGanado.texto);
+    }
+
+    // Enviar formulario
+    function enviarFormulario() {
+      const nombre = document.getElementById("nombre").value.trim();
+      const telefono = document.getElementById("telefono").value.trim();
+      const correo = document.getElementById("correo").value.trim();
+      const comentarios = document.getElementById("comentarios").value.trim();
+      
+      // Validación básica
+      if (!nombre || !telefono || !correo) {
+        alert("Por favor completa todos los campos requeridos");
+        return;
       }
+      
+      // Validar email
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+        alert("Por favor ingresa un correo electrónico válido");
+        return;
+      }
+      
+      // Guardar datos
+      datosUsuario = { nombre, telefono, correo, comentarios };
+      
+      // Mostrar ruleta
+      document.getElementById("formulario").style.display = "none";
+      document.getElementById("ruletaContainer").style.display = "block";
+      ajustarRuleta();
+    }
+
+    // Enviar datos al servidor (Google Sheets)
+    function enviarDatosAlServidor(premio) {
+      const datos = {
+        ...datosUsuario,
+        premio: premio,
+        fecha: new Date().toISOString()
+      };
+      
+      const params = new URLSearchParams();
+      for (const key in datos) {
+        params.append(key, datos[key]);
+      }
+      
+      fetch("https://script.google.com/macros/s/AKfycbwGeiWwjsWmnT6vzGK-BcFMrd56tokfcZ7LWKvLROghZt_Gy2yQyNCx4R-9FDhqGcvd/exec", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: params
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (!data.success) {
+          console.error("Error al guardar:", data.error);
+        }
+      })
+      .catch(error => {
+        console.error("Error de conexión:", error);
+      });
     }
 
     // Inicializar
-    window.addEventListener('resize', ajustarTamaño);
-    ajustarTamaño();
-    dibujarRuleta();
+    window.addEventListener('resize', ajustarRuleta);
+    ajustarRuleta();
   </script>
 </body>
 </html>
