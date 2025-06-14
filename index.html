@@ -123,93 +123,32 @@
     <div id="mensajeFinal"></div>
   </div>
 
-  <script>
-    // Premios principales
+ <script>
+    // Premios principales (deben estar primeros en el array combinado)
     const premiosPrincipales = [
-      { texto: "¡Ganaste un peluche!", color: "#FF9FF3", tipo: "premio", descripcion: "Solo redimible en tienda. Aplican términos y condiciones." },
+      { texto: "¡Ganaste un peluche!", color: "#FF9FF3", tipo: "premio", descripcion: "Solo redimible en tienda." },
       { texto: "¡Desayuno sorpresa!", color: "#FECA57", tipo: "premio", descripcion: "Aplican condiciones." },
-      { texto: "Bono $30.000", color: "#FF6B6B", tipo: "premio", descripcion: "Para comprar lo que quieras. Válido solo en tienda. Aplican términos." },
-      { texto: "Bono $20.000", color: "#48DBFB", tipo: "premio", descripcion: "En regalos y sorpresas. Redención en punto físico. Aplican condiciones." },
-      { texto: "Bono $10.000", color: "#1DD1A1", tipo: "premio", descripcion: "Para usar en tu próxima compra. No acumulable. Válido en tienda." }
+      { texto: "Bono $30.000", color: "#FF6B6B", tipo: "premio", descripcion: "Válido solo en tienda." }
     ];
 
     // Mensajes para "no ganó"
     const mensajesNoGano = [
       { texto: "¡Casi ganas!", color: "#F9D5E5", tipo: "no_gano" },
-      { texto: "Vuelve a intentarlo", color: "#E3EAA7", tipo: "no_gano" },
-      { texto: "No ganaste", color: "#FFB347", tipo: "no_gano" },
-      { texto: "Hoy no es tu día", color: "#A2C8CC", tipo: "no_gano" }
+      { texto: "Vuelve a intentarlo", color: "#E3EAA7", tipo: "no_gano" }
     ];
 
-    // Combinamos todos los premios
+    // Combinamos todos los premios (PRIMERO los premios reales)
     const todosPremios = [...premiosPrincipales, ...mensajesNoGano];
     
-    // Contador de tiradas persistente
+    // Contador persistente
     let contadorTiradas = localStorage.getItem('contadorTiradas') ? parseInt(localStorage.getItem('contadorTiradas')) : 0;
     
     let startAngle = 0;
     let arc = 2 * Math.PI / todosPremios.length;
-    let spinAngle = 0;
     let spinning = false;
     let premioObtenido = {};
 
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    const btnEnviar = document.getElementById("btnEnviar");
-    const btnGirar = document.getElementById("btnGirar");
-
-    // Ajustar canvas para dispositivos móviles
-    function ajustarCanvas() {
-      if (window.innerWidth <= 500) {
-        canvas.width = 300;
-        canvas.height = 300;
-      } else {
-        canvas.width = 400;
-        canvas.height = 400;
-      }
-      dibujarRuleta();
-    }
-
-    window.addEventListener('resize', ajustarCanvas);
-    ajustarCanvas();
-
-    function dibujarRuleta() {
-      const size = canvas.width;
-      const cx = size / 2;
-      const cy = size / 2;
-      const radio = size / 2 - 10;
-
-      ctx.clearRect(0, 0, size, size);
-      
-      for (let i = 0; i < todosPremios.length; i++) {
-        const angle = startAngle + i * arc;
-        ctx.beginPath();
-        ctx.fillStyle = todosPremios[i].color;
-        ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, radio, angle, angle + arc);
-        ctx.fill();
-
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(angle + arc / 2);
-        ctx.textAlign = "right";
-        ctx.fillStyle = "#fff";
-        
-        const fontSize = size / (todosPremios[i].texto.length > 30 ? 25 : 25);
-        ctx.font = "bold " + fontSize + "px sans-serif";
-        
-        ctx.fillText(todosPremios[i].texto, radio - 10, 10);
-        ctx.restore();
-      }
-
-      // Dibujar puntero
-      ctx.beginPath();
-      ctx.fillStyle = "#000";
-      ctx.moveTo(cx, 10);
-      ctx.lineTo(cx - 10, 30);
-      ctx.lineTo(cx + 10, 30);
-      ctx.fill();
-    }
+    // ... (funciones ajustarCanvas y dibujarRuleta se mantienen igual) ...
 
     function girarRuleta() {
       if (spinning) return;
@@ -218,14 +157,23 @@
       btnGirar.disabled = true;
       btnGirar.textContent = "Girando...";
 
-      // Incrementar y guardar contador
       contadorTiradas++;
       localStorage.setItem('contadorTiradas', contadorTiradas);
       
-      // Determinar si es la tirada 100 (o múltiplo)
       const esPremioGarantizado = contadorTiradas % 100 === 0;
+      let angle;
+      let indexDestino;
 
-      let angle = Math.random() * 720 + 720; // 4 vueltas completas + aleatorio
+      if (esPremioGarantizado) {
+        // Seleccionar solo entre premios principales (primeros en el array)
+        indexDestino = Math.floor(Math.random() * premiosPrincipales.length);
+        angle = (indexDestino * arc) + (arc/2) + (2 * Math.PI * 4);
+      } else {
+        // Selección normal entre todos los items
+        indexDestino = Math.floor(Math.random() * todosPremios.length);
+        angle = (indexDestino * arc) + (arc/2) + (2 * Math.PI * 4);
+      }
+
       let current = 0;
       let duration = 4000;
       const start = performance.now();
@@ -242,21 +190,80 @@
           btnGirar.disabled = false;
           btnGirar.textContent = "🎯 Girar la ruleta";
           
-          let finalAngle = (startAngle + arc / 2) % (2 * Math.PI);
-          let index = todosPremios.length - Math.floor(finalAngle / arc) - 1;
-          if (index < 0) index = todosPremios.length - 1;
+          premioObtenido = todosPremios[indexDestino];
+          mostrarResultado();
+        }
+      }
+
+      requestAnimationFrame(animate);
+    } <script>
+    // Premios principales (deben estar primeros en el array combinado)
+    const premiosPrincipales = [
+      { texto: "¡Ganaste un peluche!", color: "#FF9FF3", tipo: "premio", descripcion: "Solo redimible en tienda." },
+      { texto: "¡Desayuno sorpresa!", color: "#FECA57", tipo: "premio", descripcion: "Aplican condiciones." },
+      { texto: "Bono $30.000", color: "#FF6B6B", tipo: "premio", descripcion: "Válido solo en tienda." }
+    ];
+
+    // Mensajes para "no ganó"
+    const mensajesNoGano = [
+      { texto: "¡Casi ganas!", color: "#F9D5E5", tipo: "no_gano" },
+      { texto: "Vuelve a intentarlo", color: "#E3EAA7", tipo: "no_gano" }
+    ];
+
+    // Combinamos todos los premios (PRIMERO los premios reales)
+    const todosPremios = [...premiosPrincipales, ...mensajesNoGano];
+    
+    // Contador persistente
+    let contadorTiradas = localStorage.getItem('contadorTiradas') ? parseInt(localStorage.getItem('contadorTiradas')) : 0;
+    
+    let startAngle = 0;
+    let arc = 2 * Math.PI / todosPremios.length;
+    let spinning = false;
+    let premioObtenido = {};
+
+    // ... (funciones ajustarCanvas y dibujarRuleta se mantienen igual) ...
+
+    function girarRuleta() {
+      if (spinning) return;
+      
+      spinning = true;
+      btnGirar.disabled = true;
+      btnGirar.textContent = "Girando...";
+
+      contadorTiradas++;
+      localStorage.setItem('contadorTiradas', contadorTiradas);
+      
+      const esPremioGarantizado = contadorTiradas % 100 === 0;
+      let angle;
+      let indexDestino;
+
+      if (esPremioGarantizado) {
+        // Seleccionar solo entre premios principales (primeros en el array)
+        indexDestino = Math.floor(Math.random() * premiosPrincipales.length);
+        angle = (indexDestino * arc) + (arc/2) + (2 * Math.PI * 4);
+      } else {
+        // Selección normal entre todos los items
+        indexDestino = Math.floor(Math.random() * todosPremios.length);
+        angle = (indexDestino * arc) + (arc/2) + (2 * Math.PI * 4);
+      }
+
+      let current = 0;
+      let duration = 4000;
+      const start = performance.now();
+
+      function animate(time) {
+        let elapsed = time - start;
+        if (elapsed < duration) {
+          current = easeOut(elapsed, 0, angle, duration);
+          startAngle = (current * Math.PI / 180) % (2 * Math.PI);
+          dibujarRuleta();
+          requestAnimationFrame(animate);
+        } else {
+          spinning = false;
+          btnGirar.disabled = false;
+          btnGirar.textContent = "🎯 Girar la ruleta";
           
-          // Forzar premio cada 100 tiradas
-          if (esPremioGarantizado) {
-            // Seleccionar aleatoriamente solo entre premios principales
-            const indicePremio = Math.floor(Math.random() * premiosPrincipales.length);
-            premioObtenido = premiosPrincipales[indicePremio];
-            console.log("¡Premio garantizado por tirada número 100!");
-          } else {
-            // Selección normal entre todos los items
-            premioObtenido = todosPremios[index];
-          }
-          
+          premioObtenido = todosPremios[indexDestino];
           mostrarResultado();
         }
       }
