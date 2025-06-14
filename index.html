@@ -2,19 +2,66 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Formulario con Ruleta Animada</title>
+  <title>Formulario con Ruleta Barbie</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-    canvas { border: 5px solid #555; border-radius: 50%; margin: 20px 0; }
-    #formulario, #ruleta, #mensajeFinal { display: none; }
-    #formulario { display: block; }
-    input, textarea { display: block; margin: 10px auto; width: 80%; padding: 10px; }
-    button { padding: 10px 20px; font-size: 16px; margin-top: 10px; }
+    body {
+      font-family: 'Arial', sans-serif;
+      text-align: center;
+      padding: 20px;
+      background-color: #ffe6f0; /* Fondo rosado claro */
+    }
+    h2 {
+      color: #d63384;
+    }
+    canvas {
+      border: 5px solid #d63384;
+      border-radius: 50%;
+      margin: 20px 0;
+      background-color: #fff0f5;
+    }
+    #formulario, #ruleta, #mensajeFinal {
+      display: none;
+    }
+    #formulario {
+      display: block;
+      background-color: #fff0f5;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px #ffb3d9;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    input, textarea {
+      display: block;
+      margin: 10px auto;
+      width: 80%;
+      padding: 10px;
+      border: 1px solid #ff99cc;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 10px;
+      background-color: #ff69b4;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #ff1493;
+    }
+    #mensajeFinal h3 {
+      color: #c2185b;
+    }
   </style>
 </head>
 <body>
 
-<h2>¡Participa y Gira la Ruleta!</h2>
+<h2>💖 ¡Participa y Gira la Ruleta Barbie! 💖</h2>
 
 <div id="formulario">
   <input type="text" id="nombre" placeholder="Nombre" required>
@@ -33,7 +80,7 @@
 
 <script>
 const premios = ["Camiseta", "Gorra", "15% Descuento", "No ganó", "Mug", "Llaverito"];
-const colores = ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40"];
+const colores = ["#ff99cc", "#ffc0cb", "#f8bbd0", "#ffe6f0", "#f48fb1", "#ec407a"];
 let startAngle = 0;
 let arc = 2 * Math.PI / premios.length;
 let spinAngle = 0;
@@ -127,14 +174,13 @@ function enviarFormulario() {
 
 function mostrarResultado() {
   document.getElementById("ruleta").style.display = "none";
-  document.getElementById("mensajeFinal").innerHTML = `<h3>🎉 ¡Felicidades! Ganaste: <strong>${premioObtenido}</strong></h3>`;
+  document.getElementById("mensajeFinal").innerHTML = `<h3>🎉 ¡Felicidades ${window.datosUsuario.nombre}! Ganaste: <strong>${premioObtenido}</strong></h3>`;
 
   const datos = {
     ...window.datosUsuario,
     premio: premioObtenido
   };
 
-  // ENVIAR DATOS como JSON (evita e.parameter error)
   fetch("https://script.google.com/macros/s/AKfycbwGeiWwjsWmnT6vzGK-BcFMrd56tokfcZ7LWKvLROghZt_Gy2yQyNCx4R-9FDhqGcvd/exec", {
     method: "POST",
     headers: {
