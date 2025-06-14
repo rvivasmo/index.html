@@ -126,23 +126,26 @@
   <script>
     // Premios principales
     const premiosPrincipales = [
-      { texto: "¡Ganaste un peluche!", color: "#FF9FF3" },
-      { texto: "¡Desayuno sorpresa!", color: "#FECA57" },
-      { texto: "Bono $30.000", color: "#FF6B6B" },
-      { texto: "Bono $20.000", color: "#48DBFB" },
-      { texto: "Bono $10.000", color: "#1DD1A1" }
+      { texto: "¡Ganaste un peluche!", color: "#FF9FF3", tipo: "premio", descripcion: "Solo redimible en tienda. Aplican términos y condiciones." },
+      { texto: "¡Desayuno sorpresa!", color: "#FECA57", tipo: "premio", descripcion: "Aplican condiciones." },
+      { texto: "Bono $30.000", color: "#FF6B6B", tipo: "premio", descripcion: "Para comprar lo que quieras. Válido solo en tienda. Aplican términos." },
+      { texto: "Bono $20.000", color: "#48DBFB", tipo: "premio", descripcion: "En regalos y sorpresas. Redención en punto físico. Aplican condiciones." },
+      { texto: "Bono $10.000", color: "#1DD1A1", tipo: "premio", descripcion: "Para usar en tu próxima compra. No acumulable. Válido en tienda." }
     ];
 
     // Mensajes para "no ganó"
     const mensajesNoGano = [
-      { texto: "¡Casi ganas!", color: "#F9D5E5" },
-      { texto: "Vuelve a intentarlo", color: "#E3EAA7" },
-      { texto: "No ganaste", color: "#FFB347" },
-      { texto: "Hoy no es tu día", color: "#A2C8CC" }
+      { texto: "¡Casi ganas!", color: "#F9D5E5", tipo: "no_gano" },
+      { texto: "Vuelve a intentarlo", color: "#E3EAA7", tipo: "no_gano" },
+      { texto: "No ganaste", color: "#FFB347", tipo: "no_gano" },
+      { texto: "Hoy no es tu día", color: "#A2C8CC", tipo: "no_gano" }
     ];
 
-    // Combinamos todos los premios (5 principales + 15 mensajes)
+    // Combinamos todos los premios
     const todosPremios = [...premiosPrincipales, ...mensajesNoGano];
+    
+    // Contador de tiradas persistente
+    let contadorTiradas = localStorage.getItem('contadorTiradas') ? parseInt(localStorage.getItem('contadorTiradas')) : 0;
     
     let startAngle = 0;
     let arc = 2 * Math.PI / todosPremios.length;
@@ -192,7 +195,6 @@
         ctx.textAlign = "right";
         ctx.fillStyle = "#fff";
         
-        // Ajustar tamaño de fuente según la longitud del texto
         const fontSize = size / (todosPremios[i].texto.length > 30 ? 25 : 25);
         ctx.font = "bold " + fontSize + "px sans-serif";
         
@@ -216,6 +218,13 @@
       btnGirar.disabled = true;
       btnGirar.textContent = "Girando...";
 
+      // Incrementar y guardar contador
+      contadorTiradas++;
+      localStorage.setItem('contadorTiradas', contadorTiradas);
+      
+      // Determinar si es la tirada 100 (o múltiplo)
+      const esPremioGarantizado = contadorTiradas % 100 === 0;
+
       let angle = Math.random() * 720 + 720; // 4 vueltas completas + aleatorio
       let current = 0;
       let duration = 4000;
@@ -236,7 +245,18 @@
           let finalAngle = (startAngle + arc / 2) % (2 * Math.PI);
           let index = todosPremios.length - Math.floor(finalAngle / arc) - 1;
           if (index < 0) index = todosPremios.length - 1;
-          premioObtenido = todosPremios[index];
+          
+          // Forzar premio cada 100 tiradas
+          if (esPremioGarantizado) {
+            // Seleccionar aleatoriamente solo entre premios principales
+            const indicePremio = Math.floor(Math.random() * premiosPrincipales.length);
+            premioObtenido = premiosPrincipales[indicePremio];
+            console.log("¡Premio garantizado por tirada número 100!");
+          } else {
+            // Selección normal entre todos los items
+            premioObtenido = todosPremios[index];
+          }
+          
           mostrarResultado();
         }
       }
@@ -278,14 +298,14 @@
       document.getElementById("ruleta").style.display = "none";
       
       let mensaje = "";
-      if (mensajesNoGano.some(msg => msg.texto === premioObtenido.texto)) {
+      if (premioObtenido.tipo === "no_gano") {
         mensaje = `<h3>😊 Gracias por participar, ${window.datosUsuario.nombre}</h3>
                    <p>${premioObtenido.texto}</p>
-                   <p>${premioObtenido.descripcion || "Vuelve a intentarlo en otra oportunidad"}</p>`;
+                   <p>Vuelve a intentarlo en otra oportunidad</p>`;
       } else {
         mensaje = `<h3>🎉 ¡Felicidades ${window.datosUsuario.nombre}!</h3>
                    <p>${premioObtenido.texto}</p>
-                   <p>${premioObtenido.descripcion}</p>
+                   <p>${premioObtenido.descripcion || ""}</p>
                    <p>Nos pondremos en contacto contigo pronto.</p>`;
       }
       
@@ -302,7 +322,9 @@
         telefono: window.datosUsuario.telefono,
         premio: premioObtenido.texto,
         descripcion: premioObtenido.descripcion || "",
-        fecha: new Date().toISOString()
+        fecha: new Date().toISOString(),
+        esPremioGarantizado: (contadorTiradas % 100 === 0) ? "Sí" : "No",
+        contadorTiradas: contadorTiradas
       };
 
       const params = new URLSearchParams();
@@ -331,7 +353,6 @@
       })
       .catch(err => {
         console.error("Error al enviar datos:", err);
-        // No mostramos alerta al usuario para no interrumpir su experiencia
       });
     }
   </script>
