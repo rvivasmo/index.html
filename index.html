@@ -124,29 +124,28 @@
   </div>
 
 <script>
-    // Premios principales
+    // Premios principales con descripciones
     const premiosPrincipales = [
-      { texto: "¡Ganaste un peluche!", color: "#FF9FF3" },
-      { texto: "¡Desayuno sorpresa!", color: "#FECA57" },
-      { texto: "Bono $30.000", color: "#FF6B6B" },
-      { texto: "Bono $20.000", color: "#48DBFB" },
-      { texto: "Bono $10.000", color: "#1DD1A1" }
+      { texto: "¡Ganaste un peluche!", color: "#FF9FF3", descripcion: "Hermoso peluche de tu personaje favorito" },
+      { texto: "¡Desayuno sorpresa!", color: "#FECA57", descripcion: "Desayuno para dos personas en un restaurante local" },
+      { texto: "Bono $30.000", color: "#FF6B6B", descripcion: "Bono de $30.000 para usar en nuestras tiendas" },
+      { texto: "Bono $20.000", color: "#48DBFB", descripcion: "Bono de $20.000 para usar en nuestras tiendas" },
+      { texto: "Bono $10.000", color: "#1DD1A1", descripcion: "Bono de $10.000 para usar en nuestras tiendas" }
     ];
 
-    // Mensajes para "no ganó"
+    // Mensajes para "no ganó" con descripciones
     const mensajesNoGano = [
-      { texto: "¡Casi ganas!", color: "#F9D5E5" },
-      { texto: "Vuelve a intentarlo", color: "#E3EAA7" },
-      { texto: "No ganaste", color: "#FFB347" },
-      { texto: "Hoy no es tu día", color: "#A2C8CC" }
+      { texto: "¡Casi ganas!", color: "#F9D5E5", descripcion: "Estuviste muy cerca, sigue intentándolo" },
+      { texto: "Vuelve a intentarlo", color: "#E3EAA7", descripcion: "La próxima vez podrías ganar" },
+      { texto: "No ganaste", color: "#FFB347", descripcion: "Gracias por participar" },
+      { texto: "Hoy no es tu día", color: "#A2C8CC", descripcion: "Pero mañana podrías tener mejor suerte" }
     ];
 
-    // Combinamos todos los premios (5 principales + 15 mensajes)
+    // Combinamos todos los premios
     const todosPremios = [...premiosPrincipales, ...mensajesNoGano];
     
     let startAngle = 0;
     let arc = 2 * Math.PI / todosPremios.length;
-    let spinAngle = 0;
     let spinning = false;
     let premioObtenido = {};
 
@@ -209,14 +208,26 @@
       ctx.fill();
     }
 
- function girarRuleta() {
+    function girarRuleta() {
       if (spinning) return;
       
       spinning = true;
       btnGirar.disabled = true;
       btnGirar.textContent = "Girando...";
 
-      let angle = Math.random() * 720 + 720; // 4 vueltas completas + aleatorio
+      const segmentos = todosPremios.length;
+      const anguloPorSegmento = 360 / segmentos;
+      const vueltas = 4; // Número de vueltas completas
+      
+      // Elige un premio al azar (índice)
+      const premioIndex = Math.floor(Math.random() * segmentos);
+      
+      // Calcula el ángulo final para que el premio quede en la parte superior
+      const anguloFinal = -(premioIndex * anguloPorSegmento + anguloPorSegmento/2);
+      
+      // Ángulo total a girar (vueltas completas + ángulo final)
+      let angle = (vueltas * 360) + anguloFinal;
+      
       let current = 0;
       let duration = 4000;
       const start = performance.now();
@@ -233,17 +244,13 @@
           btnGirar.disabled = false;
           btnGirar.textContent = "🎯 Girar la ruleta";
           
-          let finalAngle = (startAngle + arc / 2) % (2 * Math.PI);
-          let index = todosPremios.length - Math.floor(finalAngle / arc) - 1;
-          if (index < 0) index = todosPremios.length - 1;
-          premioObtenido = todosPremios[index];
+          premioObtenido = todosPremios[premioIndex]; // Asigna directamente el premio seleccionado
           mostrarResultado();
         }
       }
 
       requestAnimationFrame(animate);
     }
-
 
     function easeOut(t, b, c, d) {
       t /= d;
@@ -265,6 +272,7 @@
 
       window.datosUsuario = { nombre, telefono };
       
+      // Simulamos un pequeño retraso para mejor UX
       setTimeout(() => {
         document.getElementById("formulario").style.display = "none";
         document.getElementById("ruleta").style.display = "block";
@@ -277,21 +285,37 @@
     function mostrarResultado() {
       document.getElementById("ruleta").style.display = "none";
       
+      // Validación adicional para asegurar que premioObtenido existe
+      if (!premioObtenido || !premioObtenido.texto) {
+        premioObtenido = { 
+          texto: "Premio no disponible", 
+          descripcion: "Ocurrió un error inesperado" 
+        };
+      }
+      
       let mensaje = "";
-      if (premioObtenido.tipo === "no_gano") {
-        mensaje = `<h3>😊 Gracias por participar, ${window.datosUsuario.nombre}</h3>
-                   <p>${premioObtenido.texto}</p>
-                   <p>Vuelve a intentarlo en otra oportunidad</p>`;
+      // Verifica si el premio está en los premios principales
+      const esPremioPrincipal = premiosPrincipales.includes(premioObtenido);
+      
+      if (!esPremioPrincipal) {
+        mensaje = `<div class="mensaje-resultado">
+                     <h3>😊 Gracias por participar, ${window.datosUsuario.nombre}</h3>
+                     <p class="premio-texto">${premioObtenido.texto}</p>
+                     <p class="premio-descripcion">${premioObtenido.descripcion}</p>
+                   </div>`;
       } else {
-        mensaje = `<h3>🎉 ¡Felicidades ${window.datosUsuario.nombre}!</h3>
-                   <p>${premioObtenido.texto}</p>
-                   <p>${premioObtenido.descripcion || ""}</p>
-                   <p>Nos pondremos en contacto contigo pronto.</p>`;
+        mensaje = `<div class="mensaje-resultado">
+                     <h3>🎉 ¡Felicidades ${window.datosUsuario.nombre}!</h3>
+                     <p class="premio-texto">${premioObtenido.texto}</p>
+                     <p class="premio-descripcion">${premioObtenido.descripcion}</p>
+                     <p class="contacto">Nos pondremos en contacto contigo pronto al número ${window.datosUsuario.telefono}.</p>
+                   </div>`;
       }
       
       document.getElementById("mensajeFinal").innerHTML = mensaje;
       document.getElementById("mensajeFinal").style.display = "block";
 
+      // Enviar datos al servidor
       enviarDatosAlServidor();
     }
 
@@ -301,9 +325,7 @@
         telefono: window.datosUsuario.telefono,
         premio: premioObtenido.texto,
         descripcion: premioObtenido.descripcion || "",
-        fecha: new Date().toISOString(),
-        esPremioGarantizado: (contadorTiradas % 50 === 0) ? "Sí" : "No",
-        contadorTiradas: contadorTiradas
+        fecha: new Date().toISOString()
       };
 
       const params = new URLSearchParams();
@@ -334,6 +356,6 @@
         console.error("Error al enviar datos:", err);
       });
     }
-  </script>
+</script>
 </body>
 </html>
