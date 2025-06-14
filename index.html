@@ -177,20 +177,43 @@ function mostrarResultado() {
   document.getElementById("mensajeFinal").innerHTML = `<h3>🎉 ¡Felicidades ${window.datosUsuario.nombre}! Ganaste: <strong>${premioObtenido}</strong></h3>`;
 
   const datos = {
-    ...window.datosUsuario,
+    nombre: window.datosUsuario.nombre,
+    telefono: window.datosUsuario.telefono,
+    correo: window.datosUsuario.correo,
+    comentarios: window.datosUsuario.comentarios || "",
     premio: premioObtenido
   };
 
-fetch("https://script.google.com/macros/s/AKfycbwGeiWwjsWmnT6vzGK-BcFMrd56tokfcZ7LWKvLROghZt_Gy2yQyNCx4R-9FDhqGcvd/exec?nombre=Test&telefono=123&correo=test@test.com&premio=Prueba", {
-  method: "POST",
-  body: new URLSearchParams({
-    nombre: datos.nombre,
-    telefono: datos.telefono,
-    correo: datos.correo,
-    comentarios: datos.comentarios || "", // Asegura que no sea undefined
-    premio: datos.premio
+  // Opción 1: Usando URLSearchParams (recomendado)
+  const params = new URLSearchParams();
+  for (const key in datos) {
+    params.append(key, datos[key]);
+  }
+
+  fetch("https://script.google.com/macros/s/AKfycbwGeiWwjsWmnT6vzGK-BcFMrd56tokfcZ7LWKvLROghZt_Gy2yQyNCx4R-9FDhqGcvd/exec", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: params,
+    redirect: "follow"
   })
-})
+  .then(response => {
+    if (!response.ok) throw new Error("Error en la respuesta del servidor");
+    return response.json();
+  })
+  .then(data => {
+    if (data.success) {
+      console.log("Datos guardados correctamente");
+    } else {
+      throw new Error(data.error || "Error desconocido");
+    }
+  })
+  .catch(err => {
+    console.error("Error al enviar datos:", err);
+    alert("Hubo un problema al guardar tus datos. Intenta de nuevo.");
+  });
+}
   .then(res => res.text())
   .then(() => {
     console.log("Datos enviados correctamente a Google Sheets");
