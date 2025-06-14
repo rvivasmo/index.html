@@ -2,25 +2,39 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Formulario con Ruleta PD</title>
   <style>
     body {
       font-family: 'Arial', sans-serif;
       text-align: center;
       padding: 20px;
-      background-color: #ffe6f0; /* Fondo rosado claro */
+      background-color: #ffe6f0;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      max-width: 500px;
+      width: 100%;
     }
     h2 {
       color: #d63384;
+      margin-bottom: 20px;
     }
     canvas {
       border: 5px solid #d63384;
       border-radius: 50%;
-      margin: 20px 0;
+      margin: 20px auto;
       background-color: #fff0f5;
+      max-width: 100%;
+      height: auto;
     }
     #formulario, #ruleta, #mensajeFinal {
       display: none;
+      width: 100%;
     }
     #formulario {
       display: block;
@@ -28,20 +42,28 @@
       padding: 20px;
       border-radius: 15px;
       box-shadow: 0 0 10px #ffb3d9;
-      max-width: 400px;
       margin: 0 auto;
     }
-    input, textarea {
+    .form-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+    label {
       display: block;
-      margin: 10px auto;
-      width: 80%;
+      margin-bottom: 5px;
+      color: #d63384;
+      font-weight: bold;
+    }
+    input, textarea {
+      width: 100%;
       padding: 10px;
       border: 1px solid #ff99cc;
       border-radius: 10px;
       font-size: 16px;
+      box-sizing: border-box;
     }
     button {
-      padding: 10px 20px;
+      padding: 12px 25px;
       font-size: 16px;
       margin-top: 10px;
       background-color: #ff69b4;
@@ -50,182 +72,261 @@
       border-radius: 10px;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      font-weight: bold;
     }
     button:hover {
       background-color: #ff1493;
     }
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    #mensajeFinal {
+      background-color: #fff0f5;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px #ffb3d9;
+    }
     #mensajeFinal h3 {
       color: #c2185b;
+      margin-top: 0;
+    }
+    @media (max-width: 500px) {
+      canvas {
+        width: 300px;
+        height: 300px;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h2>💖 ¡Participa y Gira la Ruleta PD! 💖</h2>
 
-<h2>💖 ¡Participa y Gira la Ruleta PD! 💖</h2>
+    <div id="formulario">
+      <div class="form-group">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" placeholder="Tu nombre completo" required>
+      </div>
+      <div class="form-group">
+        <label for="telefono">Teléfono:</label>
+        <input type="tel" id="telefono" placeholder="Número de teléfono" required>
+      </div>
+      <div class="form-group">
+        <label for="correo">Correo electrónico:</label>
+        <input type="email" id="correo" placeholder="tu@email.com" required>
+      </div>
+      <div class="form-group">
+        <label for="comentarios">Comentarios (opcional):</label>
+        <textarea id="comentarios" placeholder="Déjanos tus comentarios..." rows="3"></textarea>
+      </div>
+      <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
+    </div>
 
-<div id="formulario">
-  <input type="text" id="nombre" placeholder="Nombre" required>
-  <input type="tel" id="telefono" placeholder="Teléfono" required>
-  <input type="email" id="correo" placeholder="Correo electrónico" required>
-  <textarea id="comentarios" placeholder="Comentarios (opcional)" rows="3"></textarea>
-  <button onclick="enviarFormulario()">Enviar y girar ruleta</button>
-</div>
+    <div id="ruleta">
+      <canvas id="canvas" width="400" height="400"></canvas><br>
+      <button id="btnGirar" onclick="girarRuleta()">🎯 Girar la ruleta</button>
+    </div>
 
-<div id="ruleta">
-  <canvas id="canvas" width="400" height="400"></canvas><br>
-  <button onclick="girarRuleta()">🎯 Girar la ruleta</button>
-</div>
+    <div id="mensajeFinal"></div>
+  </div>
 
-<div id="mensajeFinal"></div>
+  <script>
+    const premios = ["Camiseta", "Gorra", "15% Descuento", "No ganó", "Mug", "Llaverito"];
+    const colores = ["#ff99cc", "#ffc0cb", "#f8bbd0", "#ffe6f0", "#f48fb1", "#ec407a"];
+    let startAngle = 0;
+    let arc = 2 * Math.PI / premios.length;
+    let spinAngle = 0;
+    let spinning = false;
+    let premioObtenido = "";
 
-<script>
-const premios = ["Camiseta", "Gorra", "15% Descuento", "No ganó", "Mug", "Llaverito"];
-const colores = ["#ff99cc", "#ffc0cb", "#f8bbd0", "#ffe6f0", "#f48fb1", "#ec407a"];
-let startAngle = 0;
-let arc = 2 * Math.PI / premios.length;
-let spinAngle = 0;
-let spinning = false;
-let premioObtenido = "";
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const btnEnviar = document.getElementById("btnEnviar");
+    const btnGirar = document.getElementById("btnGirar");
 
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-
-function dibujarRuleta() {
-  const cx = 200;
-  const cy = 200;
-
-  for (let i = 0; i < premios.length; i++) {
-    const angle = startAngle + i * arc;
-    ctx.beginPath();
-    ctx.fillStyle = colores[i % colores.length];
-    ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, 200, angle, angle + arc);
-    ctx.fill();
-
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(angle + arc / 2);
-    ctx.textAlign = "right";
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 16px sans-serif";
-    ctx.fillText(premios[i], 180, 10);
-    ctx.restore();
-  }
-
-  ctx.beginPath();
-  ctx.fillStyle = "#000";
-  ctx.moveTo(200, 0);
-  ctx.lineTo(190, 20);
-  ctx.lineTo(210, 20);
-  ctx.fill();
-}
-
-function girarRuleta() {
-  if (spinning) return;
-  spinning = true;
-
-  let angle = Math.random() * 360 + 720;
-  let current = 0;
-  let duration = 3000;
-  const start = performance.now();
-
-  function animate(time) {
-    let elapsed = time - start;
-    if (elapsed < duration) {
-      current = easeOut(elapsed, 0, angle, duration);
-      startAngle = (current * Math.PI / 180) % (2 * Math.PI);
-      ctx.clearRect(0, 0, 400, 400);
+    // Ajustar canvas para dispositivos móviles
+    function ajustarCanvas() {
+      if (window.innerWidth <= 500) {
+        canvas.width = 300;
+        canvas.height = 300;
+      } else {
+        canvas.width = 400;
+        canvas.height = 400;
+      }
       dibujarRuleta();
+    }
+
+    window.addEventListener('resize', ajustarCanvas);
+    ajustarCanvas();
+
+    function dibujarRuleta() {
+      const size = canvas.width;
+      const cx = size / 2;
+      const cy = size / 2;
+      const radio = size / 2 - 10;
+
+      ctx.clearRect(0, 0, size, size);
+      
+      for (let i = 0; i < premios.length; i++) {
+        const angle = startAngle + i * arc;
+        ctx.beginPath();
+        ctx.fillStyle = colores[i % colores.length];
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, radio, angle, angle + arc);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(angle + arc / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold " + (size / 15) + "px sans-serif";
+        ctx.fillText(premios[i], radio - 10, 10);
+        ctx.restore();
+      }
+
+      // Dibujar puntero
+      ctx.beginPath();
+      ctx.fillStyle = "#000";
+      ctx.moveTo(cx, 10);
+      ctx.lineTo(cx - 10, 30);
+      ctx.lineTo(cx + 10, 30);
+      ctx.fill();
+    }
+
+    function girarRuleta() {
+      if (spinning) return;
+      
+      spinning = true;
+      btnGirar.disabled = true;
+      btnGirar.textContent = "Girando...";
+
+      let angle = Math.random() * 360 + 720; // 2 vueltas completas + aleatorio
+      let current = 0;
+      let duration = 3000;
+      const start = performance.now();
+
+      function animate(time) {
+        let elapsed = time - start;
+        if (elapsed < duration) {
+          current = easeOut(elapsed, 0, angle, duration);
+          startAngle = (current * Math.PI / 180) % (2 * Math.PI);
+          dibujarRuleta();
+          requestAnimationFrame(animate);
+        } else {
+          spinning = false;
+          btnGirar.disabled = false;
+          btnGirar.textContent = "🎯 Girar la ruleta";
+          
+          let finalAngle = (startAngle + arc / 2) % (2 * Math.PI);
+          let index = premios.length - Math.floor(finalAngle / arc) - 1;
+          if (index < 0) index = premios.length - 1;
+          premioObtenido = premios[index];
+          mostrarResultado();
+        }
+      }
+
       requestAnimationFrame(animate);
-    } else {
-      let finalAngle = (startAngle + arc / 2) % (2 * Math.PI);
-      let index = premios.length - Math.floor(finalAngle / arc) - 1;
-      if (index < 0) index = premios.length - 1;
-      premioObtenido = premios[index];
-      mostrarResultado();
     }
-  }
 
-  requestAnimationFrame(animate);
-}
-
-function easeOut(t, b, c, d) {
-  t /= d;
-  t--;
-  return c*(t*t*t + 1) + b;
-}
-
-function enviarFormulario() {
-  const nombre = document.getElementById("nombre").value.trim();
-  const telefono = document.getElementById("telefono").value.trim();
-  const correo = document.getElementById("correo").value.trim();
-  const comentarios = document.getElementById("comentarios").value.trim();
-
-  if (!nombre || !telefono || !correo) {
-    alert("Por favor, completa todos los campos requeridos.");
-    return;
-  }
-
-  window.datosUsuario = { nombre, telefono, correo, comentarios };
-  document.getElementById("formulario").style.display = "none";
-  document.getElementById("ruleta").style.display = "block";
-  dibujarRuleta();
-}
-
-function mostrarResultado() {
-  document.getElementById("ruleta").style.display = "none";
-  document.getElementById("mensajeFinal").innerHTML = `<h3>🎉 ¡Felicidades ${window.datosUsuario.nombre}! Ganaste: <strong>${premioObtenido}</strong></h3>`;
-
-  const datos = {
-    nombre: window.datosUsuario.nombre,
-    telefono: window.datosUsuario.telefono,
-    correo: window.datosUsuario.correo,
-    comentarios: window.datosUsuario.comentarios || "",
-    premio: premioObtenido
-  };
-
-  // Opción 1: Usando URLSearchParams (recomendado)
-  const params = new URLSearchParams();
-  for (const key in datos) {
-    params.append(key, datos[key]);
-  }
-
-  fetch("https://script.google.com/macros/s/AKfycbwGeiWwjsWmnT6vzGK-BcFMrd56tokfcZ7LWKvLROghZt_Gy2yQyNCx4R-9FDhqGcvd/exec", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: params,
-    redirect: "follow"
-  })
-  .then(response => {
-    if (!response.ok) throw new Error("Error en la respuesta del servidor");
-    return response.json();
-  })
-  .then(data => {
-    if (data.success) {
-      console.log("Datos guardados correctamente");
-    } else {
-      throw new Error(data.error || "Error desconocido");
+    function easeOut(t, b, c, d) {
+      t /= d;
+      t--;
+      return c*(t*t*t + 1) + b;
     }
-  })
-  .catch(err => {
-    console.error("Error al enviar datos:", err);
-    alert("Hubo un problema al guardar tus datos. Intenta de nuevo.");
-  });
-}
-  .then(res => res.text())
-  .then(() => {
-    console.log("Datos enviados correctamente a Google Sheets");
-  })
-  .catch(err => {
-    console.error("Error al enviar datos:", err);
-    alert("Hubo un problema al guardar tus datos. Intenta de nuevo.");
-  });
 
-  spinning = false;
-}
-</script>
+    function enviarFormulario() {
+      const nombre = document.getElementById("nombre").value.trim();
+      const telefono = document.getElementById("telefono").value.trim();
+      const correo = document.getElementById("correo").value.trim();
+      const comentarios = document.getElementById("comentarios").value.trim();
 
+      if (!nombre || !telefono || !correo) {
+        alert("Por favor, completa todos los campos requeridos.");
+        return;
+      }
+
+      // Validación básica de email
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+        alert("Por favor, ingresa un correo electrónico válido.");
+        return;
+      }
+
+      btnEnviar.disabled = true;
+      btnEnviar.textContent = "Enviando...";
+
+      window.datosUsuario = { nombre, telefono, correo, comentarios };
+      
+      // Simulamos un pequeño retraso para mejor UX
+      setTimeout(() => {
+        document.getElementById("formulario").style.display = "none";
+        document.getElementById("ruleta").style.display = "block";
+        btnEnviar.disabled = false;
+        btnEnviar.textContent = "Enviar y girar ruleta";
+        dibujarRuleta();
+      }, 800);
+    }
+
+    function mostrarResultado() {
+      document.getElementById("ruleta").style.display = "none";
+      
+      let mensaje = "";
+      if (premioObtenido === "No ganó") {
+        mensaje = `<h3>😊 Gracias por participar, ${window.datosUsuario.nombre}</h3>
+                   <p>Esta vez no has ganado, pero ¡sigue intentándolo!</p>`;
+      } else {
+        mensaje = `<h3>🎉 ¡Felicidades ${window.datosUsuario.nombre}!</h3>
+                   <p>Has ganado: <strong>${premioObtenido}</strong></p>
+                   <p>Nos pondremos en contacto contigo pronto.</p>`;
+      }
+      
+      document.getElementById("mensajeFinal").innerHTML = mensaje;
+      document.getElementById("mensajeFinal").style.display = "block";
+
+      // Enviar datos al servidor
+      enviarDatosAlServidor();
+    }
+
+    function enviarDatosAlServidor() {
+      const datos = {
+        nombre: window.datosUsuario.nombre,
+        telefono: window.datosUsuario.telefono,
+        correo: window.datosUsuario.correo,
+        comentarios: window.datosUsuario.comentarios || "",
+        premio: premioObtenido,
+        fecha: new Date().toISOString()
+      };
+
+      const params = new URLSearchParams();
+      for (const key in datos) {
+        params.append(key, datos[key]);
+      }
+
+      fetch("https://script.google.com/macros/s/AKfycbwGeiWwjsWmnT6vzGK-BcFMrd56tokfcZ7LWKvLROghZt_Gy2yQyNCx4R-9FDhqGcvd/exec", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: params,
+        redirect: "follow"
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Error en la respuesta del servidor");
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          console.log("Datos guardados correctamente");
+        } else {
+          console.error("Error del servidor:", data.error);
+        }
+      })
+      .catch(err => {
+        console.error("Error al enviar datos:", err);
+        // No mostramos alerta al usuario para no interrumpir su experiencia
+      });
+    }
+  </script>
 </body>
 </html>
