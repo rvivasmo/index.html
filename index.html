@@ -124,27 +124,29 @@
   </div>
 
 <script>
-    // Contador persistente de tiradas
-    let contadorTiradas = localStorage.getItem('contadorTiradas') ? parseInt(localStorage.getItem('contadorTiradas')) : 0;
-
-    // Premios principales (los primeros en el array)
+    // Premios principales
     const premiosPrincipales = [
-      { texto: "¡Ganaste un peluche!", color: "#FF9FF3", tipo: "premio", descripcion: "Solo redimible en tienda." },
-      { texto: "¡Desayuno sorpresa!", color: "#FECA57", tipo: "premio", descripcion: "Aplican condiciones." },
-      { texto: "Bono $30.000", color: "#FF6B6B", tipo: "premio", descripcion: "Válido solo en tienda." }
+      { texto: "¡Ganaste un peluche!", color: "#FF9FF3" },
+      { texto: "¡Desayuno sorpresa!", color: "#FECA57" },
+      { texto: "Bono $30.000", color: "#FF6B6B" },
+      { texto: "Bono $20.000", color: "#48DBFB" },
+      { texto: "Bono $10.000", color: "#1DD1A1" }
     ];
 
     // Mensajes para "no ganó"
     const mensajesNoGano = [
-      { texto: "¡Casi ganas!", color: "#F9D5E5", tipo: "no_gano" },
-      { texto: "Vuelve a intentarlo", color: "#E3EAA7", tipo: "no_gano" }
+      { texto: "¡Casi ganas!", color: "#F9D5E5" },
+      { texto: "Vuelve a intentarlo", color: "#E3EAA7" },
+      { texto: "No ganaste", color: "#FFB347" },
+      { texto: "Hoy no es tu día", color: "#A2C8CC" }
     ];
 
-    // Combinamos todos los premios (PRIMERO los premios reales)
+    // Combinamos todos los premios (5 principales + 15 mensajes)
     const todosPremios = [...premiosPrincipales, ...mensajesNoGano];
     
     let startAngle = 0;
     let arc = 2 * Math.PI / todosPremios.length;
+    let spinAngle = 0;
     let spinning = false;
     let premioObtenido = {};
 
@@ -214,27 +216,9 @@
       btnGirar.disabled = true;
       btnGirar.textContent = "Girando...";
 
-      // Incrementar contador
-      contadorTiradas++;
-      localStorage.setItem('contadorTiradas', contadorTiradas);
-      
-      // Determinar si es tirada especial (cada 50)
-      const esPremioGarantizado = contadorTiradas % 50 === 0;
-      
-      // Seleccionar premio ANTES de girar
-      let indexDestino;
-      if (esPremioGarantizado) {
-        indexDestino = Math.floor(Math.random() * premiosPrincipales.length);
-      } else {
-        indexDestino = Math.floor(Math.random() * todosPremios.length);
-      }
-      
-      // Configuración de la animación
-      const anguloFinal = (indexDestino * arc) + (arc/2);
-      const vueltas = 4; // Vueltas completas antes de detenerse
-      const angle = (vueltas * 2 * Math.PI) + anguloFinal;
+      let angle = Math.random() * 720 + 720; // 4 vueltas completas + aleatorio
       let current = 0;
-      let duration = 4000 + Math.random() * 1000; // Duración variable
+      let duration = 4000;
       const start = performance.now();
 
       function animate(time) {
@@ -249,11 +233,10 @@
           btnGirar.disabled = false;
           btnGirar.textContent = "🎯 Girar la ruleta";
           
-          // Asegurar posición final exacta
-          startAngle = -anguloFinal;
-          dibujarRuleta();
-          
-          premioObtenido = todosPremios[indexDestino];
+          let finalAngle = (startAngle + arc / 2) % (2 * Math.PI);
+          let index = todosPremios.length - Math.floor(finalAngle / arc) - 1;
+          if (index < 0) index = todosPremios.length - 1;
+          premioObtenido = todosPremios[index];
           mostrarResultado();
         }
       }
