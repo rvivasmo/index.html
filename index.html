@@ -55,7 +55,6 @@ function dibujarRuleta() {
     ctx.arc(cx, cy, 200, angle, angle + arc);
     ctx.fill();
 
-    // Texto
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(angle + arc / 2);
@@ -66,7 +65,6 @@ function dibujarRuleta() {
     ctx.restore();
   }
 
-  // Flecha arriba
   ctx.beginPath();
   ctx.fillStyle = "#000";
   ctx.moveTo(200, 0);
@@ -79,9 +77,9 @@ function girarRuleta() {
   if (spinning) return;
   spinning = true;
 
-  let angle = Math.random() * 360 + 720; // Gira entre 2 y 3 vueltas
+  let angle = Math.random() * 360 + 720;
   let current = 0;
-  let duration = 3000; // 3 segundos
+  let duration = 3000;
   const start = performance.now();
 
   function animate(time) {
@@ -93,7 +91,6 @@ function girarRuleta() {
       dibujarRuleta();
       requestAnimationFrame(animate);
     } else {
-      // Resultado
       let finalAngle = (startAngle + arc / 2) % (2 * Math.PI);
       let index = premios.length - Math.floor((finalAngle) / arc) - 1;
       if (index < 0) index = premios.length - 1;
@@ -137,10 +134,16 @@ function mostrarResultado() {
     premio: premioObtenido
   };
 
+  const formData = new FormData();
+  formData.append("nombre", datos.nombre);
+  formData.append("telefono", datos.telefono);
+  formData.append("correo", datos.correo);
+  formData.append("comentarios", datos.comentarios);
+  formData.append("premio", datos.premio);
+
   fetch("https://script.google.com/macros/s/AKfycbxoZw4c5ljLaH4cXWO6cP0RVCHfuGduAI0qUPvn1_hx7duuh5hTLN_1ioMk-gFZYP6Ipw/exec", {
     method: "POST",
-    body: JSON.stringify(datos),
-    headers: { "Content-Type": "application/json" }
+    body: formData
   })
   .then(res => res.text())
   .then(() => {
