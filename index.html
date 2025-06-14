@@ -112,6 +112,14 @@
         <label for="telefono">Teléfono:</label>
         <input type="tel" id="telefono" placeholder="Número de teléfono" required>
       </div>
+      <div class="form-group">
+        <label for="correo">Correo electrónico:</label>
+        <input type="email" id="correo" placeholder="tu@email.com" required>
+      </div>
+      <div class="form-group">
+        <label for="comentarios">Comentarios (opcional):</label>
+        <textarea id="comentarios" placeholder="Déjanos tus comentarios..." rows="3"></textarea>
+      </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
 
@@ -123,29 +131,41 @@
     <div id="mensajeFinal"></div>
   </div>
 
-<script>
-    // Premios principales con descripciones
+  <script>
+    // Premios principales
     const premiosPrincipales = [
-      { texto: "¡Ganaste un peluche!", color: "#FF9FF3", descripcion: "Hermoso peluche de tu personaje favorito" },
-      { texto: "¡Desayuno sorpresa!", color: "#FECA57", descripcion: "Desayuno para dos personas en un restaurante local" },
-      { texto: "Bono $30.000", color: "#FF6B6B", descripcion: "Bono de $30.000 para usar en nuestras tiendas" },
-      { texto: "Bono $20.000", color: "#48DBFB", descripcion: "Bono de $20.000 para usar en nuestras tiendas" },
-      { texto: "Bono $10.000", color: "#1DD1A1", descripcion: "Bono de $10.000 para usar en nuestras tiendas" }
+      { texto: "🧸 ¡Ganaste un peluche!", descripcion: "Solo redimible en tienda. Aplican términos y condiciones.", color: "#FF9FF3" },
+      { texto: "🍽 ¡Desayuno sorpresa!", descripcion: "Aplican condiciones.", color: "#FECA57" },
+      { texto: "🎉 Bono de $30.000", descripcion: "Para comprar lo que quieras. Válido solo en tienda. Aplican términos.", color: "#FF6B6B" },
+      { texto: "🎈 Bono de $20.000", descripcion: "En regalos y sorpresas. Redención en punto físico. Aplican condiciones.", color: "#48DBFB" },
+      { texto: "💝 Bono de $10.000", descripcion: "Para usar en tu próxima compra. No acumulable. Válido en tienda.", color: "#1DD1A1" }
     ];
 
-    // Mensajes para "no ganó" con descripciones
+    // Mensajes para "no ganó"
     const mensajesNoGano = [
-      { texto: "¡Casi ganas!", color: "#F9D5E5", descripcion: "Estuviste muy cerca, sigue intentándolo" },
-      { texto: "Vuelve a intentarlo", color: "#E3EAA7", descripcion: "La próxima vez podrías ganar" },
-      { texto: "No ganaste", color: "#FFB347", descripcion: "Gracias por participar" },
-      { texto: "Hoy no es tu día", color: "#A2C8CC", descripcion: "Pero mañana podrías tener mejor suerte" }
+      { texto: "🎀 Te hace falta un moño… ¡pero casi ganas!", color: "#F9D5E5" },
+      { texto: "🎈 Ni con globo, ni con moño… vuelve a intentarlo", color: "#E3EAA7" },
+      { texto: "🧸 El peluche te vio… y se escondió 😅", color: "#B2E2E2" },
+      { texto: "💌 No ganaste, pero somos tu fan", color: "#FFB347" },
+      { texto: "🎁 Tu regalo viene en camino… pero no hoy 😬", color: "#A2C8CC" },
+      { texto: "🛍 Este intento no trae sorpresa, ¡pero no te rindas!", color: "#FFD3B6" },
+      { texto: "📦 Regalo extraviado… sigue participando", color: "#D4A5A5" },
+      { texto: "🎉 ¡Uy! Lo envolvimos… pero no te tocó", color: "#FF9AA2" },
+      { texto: "✨ No hay premio, pero sí buena vibra ✨", color: "#FFB7B2" },
+      { texto: "🎂 Este espacio está lleno de nada (pero con cariño)", color: "#C7CEEA" },
+      { texto: "💘 Te salió un abrazo imaginario 💕", color: "#F8C3CD" },
+      { texto: "🧨 Explosión de suerte... cancelada", color: "#FFD166" },
+      { texto: "📮 Suerte para la próxima, sigue girando", color: "#06D6A0" },
+      { texto: "🪄 Tu suerte está tomando forma... pero no ahora", color: "#118AB2" },
+      { texto: "📷 Ni con foto del regalo ganabas esta vez", color: "#EF476F" }
     ];
 
-    // Combinamos todos los premios
+    // Combinamos todos los premios (5 principales + 15 mensajes)
     const todosPremios = [...premiosPrincipales, ...mensajesNoGano];
     
     let startAngle = 0;
     let arc = 2 * Math.PI / todosPremios.length;
+    let spinAngle = 0;
     let spinning = false;
     let premioObtenido = {};
 
@@ -192,7 +212,7 @@
         ctx.fillStyle = "#fff";
         
         // Ajustar tamaño de fuente según la longitud del texto
-        const fontSize = size / (todosPremios[i].texto.length > 30 ? 25 : 25);
+        const fontSize = size / (todosPremios[i].texto.length > 30 ? 15 : 12);
         ctx.font = "bold " + fontSize + "px sans-serif";
         
         ctx.fillText(todosPremios[i].texto, radio - 10, 10);
@@ -215,21 +235,9 @@
       btnGirar.disabled = true;
       btnGirar.textContent = "Girando...";
 
-      const segmentos = todosPremios.length;
-      const anguloPorSegmento = 360 / segmentos;
-      const vueltas = 4; // Número de vueltas completas
-      
-      // Elige un premio al azar (índice)
-      const premioIndex = Math.floor(Math.random() * segmentos);
-      
-      // Calcula el ángulo final para que el premio quede en la parte superior
-      const anguloFinal = -(premioIndex * anguloPorSegmento + anguloPorSegmento/2);
-      
-      // Ángulo total a girar (vueltas completas + ángulo final)
-      let angle = (vueltas * 360) + anguloFinal;
-      
+      let angle = Math.random() * 360 + 720; // 2 vueltas completas + aleatorio
       let current = 0;
-      let duration = 4000;
+      let duration = 3000;
       const start = performance.now();
 
       function animate(time) {
@@ -244,7 +252,10 @@
           btnGirar.disabled = false;
           btnGirar.textContent = "🎯 Girar la ruleta";
           
-          premioObtenido = todosPremios[premioIndex]; // Asigna directamente el premio seleccionado
+          let finalAngle = (startAngle + arc / 2) % (2 * Math.PI);
+          let index = todosPremios.length - Math.floor(finalAngle / arc) - 1;
+          if (index < 0) index = todosPremios.length - 1;
+          premioObtenido = todosPremios[index];
           mostrarResultado();
         }
       }
@@ -261,16 +272,24 @@
     function enviarFormulario() {
       const nombre = document.getElementById("nombre").value.trim();
       const telefono = document.getElementById("telefono").value.trim();
+      const correo = document.getElementById("correo").value.trim();
+      const comentarios = document.getElementById("comentarios").value.trim();
 
-      if (!nombre || !telefono) {
+      if (!nombre || !telefono || !correo) {
         alert("Por favor, completa todos los campos requeridos.");
+        return;
+      }
+
+      // Validación básica de email
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+        alert("Por favor, ingresa un correo electrónico válido.");
         return;
       }
 
       btnEnviar.disabled = true;
       btnEnviar.textContent = "Enviando...";
 
-      window.datosUsuario = { nombre, telefono };
+      window.datosUsuario = { nombre, telefono, correo, comentarios };
       
       // Simulamos un pequeño retraso para mejor UX
       setTimeout(() => {
@@ -285,31 +304,16 @@
     function mostrarResultado() {
       document.getElementById("ruleta").style.display = "none";
       
-      // Validación adicional para asegurar que premioObtenido existe
-      if (!premioObtenido || !premioObtenido.texto) {
-        premioObtenido = { 
-          texto: "Premio no disponible", 
-          descripcion: "Ocurrió un error inesperado" 
-        };
-      }
-      
       let mensaje = "";
-      // Verifica si el premio está en los premios principales
-      const esPremioPrincipal = premiosPrincipales.includes(premioObtenido);
-      
-      if (!esPremioPrincipal) {
-        mensaje = `<div class="mensaje-resultado">
-                     <h3>😊 Gracias por participar, ${window.datosUsuario.nombre}</h3>
-                     <p class="premio-texto">${premioObtenido.texto}</p>
-                     <p class="premio-descripcion">${premioObtenido.descripcion}</p>
-                   </div>`;
+      if (mensajesNoGano.some(msg => msg.texto === premioObtenido.texto)) {
+        mensaje = `<h3>😊 Gracias por participar, ${window.datosUsuario.nombre}</h3>
+                   <p>${premioObtenido.texto}</p>
+                   <p>${premioObtenido.descripcion || "Vuelve a intentarlo en otra oportunidad"}</p>`;
       } else {
-        mensaje = `<div class="mensaje-resultado">
-                     <h3>🎉 ¡Felicidades ${window.datosUsuario.nombre}!</h3>
-                     <p class="premio-texto">${premioObtenido.texto}</p>
-                     <p class="premio-descripcion">${premioObtenido.descripcion}</p>
-                     <p class="contacto">Nos pondremos en contacto contigo pronto al número ${window.datosUsuario.telefono}.</p>
-                   </div>`;
+        mensaje = `<h3>🎉 ¡Felicidades ${window.datosUsuario.nombre}!</h3>
+                   <p>${premioObtenido.texto}</p>
+                   <p>${premioObtenido.descripcion}</p>
+                   <p>Nos pondremos en contacto contigo pronto.</p>`;
       }
       
       document.getElementById("mensajeFinal").innerHTML = mensaje;
@@ -323,6 +327,8 @@
       const datos = {
         nombre: window.datosUsuario.nombre,
         telefono: window.datosUsuario.telefono,
+        correo: window.datosUsuario.correo,
+        comentarios: window.datosUsuario.comentarios || "",
         premio: premioObtenido.texto,
         descripcion: premioObtenido.descripcion || "",
         fecha: new Date().toISOString()
@@ -333,7 +339,7 @@
         params.append(key, datos[key]);
       }
 
-      fetch("https://script.google.com/macros/s/AKfycbxJnyIoOgNQGrXudraKp9pt9QVcgxzEI6F3ga1uziAU_78BciNcxzyqRP2GzQi36TNM/exec", {
+      fetch("https://script.google.com/macros/s/AKfycbwA_hLTexJQhfPspb-hgGluSXas-Furz-_RqHHGOzT0LNcnjEpf5zeY5KNl5pOzlzNk/exec", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -354,8 +360,123 @@
       })
       .catch(err => {
         console.error("Error al enviar datos:", err);
+        // No mostramos alerta al usuario para no interrumpir su experiencia
       });
     }
-</script>
+  </script>
 </body>
 </html>
+
+
+
+CON EL APP SCRIPT
+
+function doPost(e) {
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type"
+  };
+  
+  try {
+    console.log("Iniciando doPost...");
+    console.log("Parámetros recibidos:", JSON.stringify(e));
+    
+    if (!e || !e.parameter) {
+      throw new Error("No se recibieron datos");
+    }
+    
+    const datos = e.parameter;
+    console.log("Datos parseados:", datos);
+    
+    // Validación mínima
+    if (!datos.nombre) throw new Error("Nombre es requerido");
+    if (!datos.correo) throw new Error("Correo es requerido");
+    
+    // Acceso a la hoja
+    const spreadsheetId = "1Ci5KeJv9HuOVE6lxy1o9aNzNdld-kqwZUvgtL1vQ8Ys";
+    const sheetName = "Respuestas";
+    
+    console.log("Abriendo hoja...");
+    const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+    if (!spreadsheet) throw new Error("No se pudo acceder al spreadsheet");
+    
+    let hoja = spreadsheet.getSheetByName(sheetName);
+    if (!hoja) {
+      console.log("Hoja no encontrada, creando nueva...");
+      hoja = spreadsheet.insertSheet(sheetName);
+      hoja.appendRow(["Fecha", "Nombre", "Teléfono", "Correo", "Comentarios", "Premio"]);
+    }
+    
+    // Preparar fila
+    const fila = [
+      new Date(),
+      datos.nombre || "",
+      datos.telefono || "",
+      datos.correo || "",
+      datos.comentarios || "",
+      datos.premio || ""
+    ];
+    
+    console.log("Insertando fila:", fila);
+    hoja.appendRow(fila);
+    SpreadsheetApp.flush();
+    console.log("Datos guardados exitosamente");
+    
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: true,
+        message: "Datos guardados",
+        row: hoja.getLastRow()
+      })
+    )
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeaders(corsHeaders);
+    
+  } catch (error) {
+    console.error("Error en doPost:", error.message, error.stack);
+    
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: false,
+        error: error.message,
+        details: error.stack
+      })
+    )
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeaders(corsHeaders);
+  }
+}
+
+function doOptions() {
+  return ContentService.createTextOutput('')
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeaders({
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type"
+    });
+}
+
+// Función para pruebas
+function testDoPost() {
+  const e = {
+    parameter: {
+      nombre: "Test User",
+      telefono: "5551234567",
+      correo: "test@example.com",
+      comentarios: "Prueba de guardado",
+      premio: "15% Descuento"
+    }
+  };
+  
+  const result = doPost(e);
+  Logger.log(result.getContent());
+  
+  // Verificar en la hoja
+  const ss = SpreadsheetApp.openById("1Ci5KeJv9HuOVE6lxy1o9aNzNdld-kqwZUvgtL1vQ8Ys");
+  const sheet = ss.getSheetByName("Respuestas");
+  const lastRow = sheet.getLastRow();
+  Logger.log("Última fila insertada: " + lastRow);
+  Logger.log("Datos: " + JSON.stringify(sheet.getRange(lastRow, 1, 1, 6).getValues()));
+}
