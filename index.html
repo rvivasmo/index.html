@@ -112,14 +112,6 @@
         <label for="telefono">Teléfono:</label>
         <input type="tel" id="telefono" placeholder="Número de teléfono" required>
       </div>
-      <div class="form-group">
-        <label for="correo">Correo electrónico:</label>
-        <input type="email" id="correo" placeholder="tu@email.com" required>
-      </div>
-      <div class="form-group">
-        <label for="comentarios">Comentarios (opcional):</label>
-        <textarea id="comentarios" placeholder="Déjanos tus comentarios..." rows="3"></textarea>
-      </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
 
@@ -272,24 +264,16 @@
     function enviarFormulario() {
       const nombre = document.getElementById("nombre").value.trim();
       const telefono = document.getElementById("telefono").value.trim();
-      const correo = document.getElementById("correo").value.trim();
-      const comentarios = document.getElementById("comentarios").value.trim();
 
-      if (!nombre || !telefono || !correo) {
+      if (!nombre || !telefono) {
         alert("Por favor, completa todos los campos requeridos.");
-        return;
-      }
-
-      // Validación básica de email
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
-        alert("Por favor, ingresa un correo electrónico válido.");
         return;
       }
 
       btnEnviar.disabled = true;
       btnEnviar.textContent = "Enviando...";
 
-      window.datosUsuario = { nombre, telefono, correo, comentarios };
+      window.datosUsuario = { nombre, telefono };
       
       // Simulamos un pequeño retraso para mejor UX
       setTimeout(() => {
@@ -327,8 +311,6 @@
       const datos = {
         nombre: window.datosUsuario.nombre,
         telefono: window.datosUsuario.telefono,
-        correo: window.datosUsuario.correo,
-        comentarios: window.datosUsuario.comentarios || "",
         premio: premioObtenido.texto,
         descripcion: premioObtenido.descripcion || "",
         fecha: new Date().toISOString()
@@ -366,117 +348,3 @@
   </script>
 </body>
 </html>
-
-
-
-CON EL APP SCRIPT
-
-function doPost(e) {
-  const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type"
-  };
-  
-  try {
-    console.log("Iniciando doPost...");
-    console.log("Parámetros recibidos:", JSON.stringify(e));
-    
-    if (!e || !e.parameter) {
-      throw new Error("No se recibieron datos");
-    }
-    
-    const datos = e.parameter;
-    console.log("Datos parseados:", datos);
-    
-    // Validación mínima
-    if (!datos.nombre) throw new Error("Nombre es requerido");
-    if (!datos.correo) throw new Error("Correo es requerido");
-    
-    // Acceso a la hoja
-    const spreadsheetId = "1Ci5KeJv9HuOVE6lxy1o9aNzNdld-kqwZUvgtL1vQ8Ys";
-    const sheetName = "Respuestas";
-    
-    console.log("Abriendo hoja...");
-    const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
-    if (!spreadsheet) throw new Error("No se pudo acceder al spreadsheet");
-    
-    let hoja = spreadsheet.getSheetByName(sheetName);
-    if (!hoja) {
-      console.log("Hoja no encontrada, creando nueva...");
-      hoja = spreadsheet.insertSheet(sheetName);
-      hoja.appendRow(["Fecha", "Nombre", "Teléfono", "Correo", "Comentarios", "Premio"]);
-    }
-    
-    // Preparar fila
-    const fila = [
-      new Date(),
-      datos.nombre || "",
-      datos.telefono || "",
-      datos.correo || "",
-      datos.comentarios || "",
-      datos.premio || ""
-    ];
-    
-    console.log("Insertando fila:", fila);
-    hoja.appendRow(fila);
-    SpreadsheetApp.flush();
-    console.log("Datos guardados exitosamente");
-    
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: true,
-        message: "Datos guardados",
-        row: hoja.getLastRow()
-      })
-    )
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeaders(corsHeaders);
-    
-  } catch (error) {
-    console.error("Error en doPost:", error.message, error.stack);
-    
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: false,
-        error: error.message,
-        details: error.stack
-      })
-    )
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeaders(corsHeaders);
-  }
-}
-
-function doOptions() {
-  return ContentService.createTextOutput('')
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeaders({
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type"
-    });
-}
-
-// Función para pruebas
-function testDoPost() {
-  const e = {
-    parameter: {
-      nombre: "Test User",
-      telefono: "5551234567",
-      correo: "test@example.com",
-      comentarios: "Prueba de guardado",
-      premio: "15% Descuento"
-    }
-  };
-  
-  const result = doPost(e);
-  Logger.log(result.getContent());
-  
-  // Verificar en la hoja
-  const ss = SpreadsheetApp.openById("1Ci5KeJv9HuOVE6lxy1o9aNzNdld-kqwZUvgtL1vQ8Ys");
-  const sheet = ss.getSheetByName("Respuestas");
-  const lastRow = sheet.getLastRow();
-  Logger.log("Última fila insertada: " + lastRow);
-  Logger.log("Datos: " + JSON.stringify(sheet.getRange(lastRow, 1, 1, 6).getValues()));
-}
