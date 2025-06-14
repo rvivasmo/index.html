@@ -227,67 +227,72 @@
       ctx.fill();
     }
 
-    // Función para girar la ruleta
-    function girarRuleta() {
-      if (spinning) return;
+function girarRuleta() {
+  if (spinning) return;
+  
+  spinning = true;
+  btnGirar.disabled = true;
+  btnGirar.textContent = "Girando...";
+
+  // Incrementar contador
+  contadorGiros++;
+  localStorage.setItem('contadorGiros', contadorGiros);
+
+  // Determinar si es el giro 100 (premio forzado)
+  const esPremioForzado = contadorGiros % 100 === 0;
+  
+  let angle;
+  if (esPremioForzado) {
+    // Forzar ángulo para premio principal
+    const indicePremio = Math.floor(Math.random() * premiosPrincipales.length);
+    const posicionPremio = todosPremios.findIndex(p => p.texto === premiosPrincipales[indicePremio].texto);
+    angle = (posicionPremio * arc + arc/2) * (180/Math.PI);
+    angle += 720 * 5; // Vueltas extras para animación
+  } else {
+    // Girar normalmente, pero solo considerar mensajesNoGano
+    const indicesNoGano = todosPremios
+      .map((premio, index) => mensajesNoGano.some(m => m.texto === premio.texto) ? index : -1)
+      .filter(index => index !== -1);
+    
+    const indiceAleatorio = indicesNoGano[Math.floor(Math.random() * indicesNoGano.length)];
+    angle = (indiceAleatorio * arc + arc/2) * (180/Math.PI);
+    angle += Math.random() * 720 + 720; // Animación normal
+  }
+
+  let current = 0;
+  let duration = 4000;
+  const start = performance.now();
+
+  function animate(time) {
+    let elapsed = time - start;
+    if (elapsed < duration) {
+      current = easeOut(elapsed, 0, angle, duration);
+      startAngle = (current * Math.PI / 180) % (2 * Math.PI);
+      dibujarRuleta();
+      requestAnimationFrame(animate);
+    } else {
+      spinning = false;
+      btnGirar.disabled = false;
+      btnGirar.textContent = "🎯 Girar la ruleta";
       
-      spinning = true;
-      btnGirar.disabled = true;
-      btnGirar.textContent = "Girando...";
-
-      // Incrementar y guardar contador
-      contadorGiros++;
-      localStorage.setItem('contadorGiros', contadorGiros);
-      actualizarContador(); // Actualizar el contador en la interfaz
-
-      const esPremioForzado = contadorGiros % 100 === 0;
-      const premiosActuales = esPremioForzado ? todosPremios : ruletaNormal;
-      const arcActual = 2 * Math.PI / premiosActuales.length;
-
-      let angle;
-      if (esPremioForzado) {
-        // Forzar premio principal
-        const indicePremio = Math.floor(Math.random() * premiosPrincipales.length);
-        const posicionPremio = todosPremios.findIndex(p => p.texto === premiosPrincipales[indicePremio].texto);
-        angle = (posicionPremio * arcActual + arcActual/2) * (180/Math.PI);
-        angle += 720 * 5; // Vueltas extras para animación
-      } else {
-        angle = Math.random() * 720 + 720; // Giros normales
-      }
-
-      let current = 0;
-      let duration = 4000;
-      const start = performance.now();
-
-      function animate(time) {
-        let elapsed = time - start;
-        if (elapsed < duration) {
-          current = easeOut(elapsed, 0, angle, duration);
-          startAngle = (current * Math.PI / 180) % (2 * Math.PI);
-          dibujarRuleta(premiosActuales, arcActual);
-          requestAnimationFrame(animate);
-        } else {
-          spinning = false;
-          btnGirar.disabled = false;
-          btnGirar.textContent = "🎯 Girar la ruleta";
-          
-          let finalAngle = (startAngle + arcActual / 2) % (2 * Math.PI);
-          let index = premiosActuales.length - Math.floor(finalAngle / arcActual) - 1;
-          if (index < 0) index = premiosActuales.length - 1;
-          
-          premioObtenido = premiosActuales[index];
-          
-          // Asegurar premio principal si es giro 100
-          if (esPremioForzado) {
-            premioObtenido = premiosPrincipales[Math.floor(Math.random() * premiosPrincipales.length)];
-          }
-          
-          mostrarResultado();
+      let finalAngle = (startAngle + arc / 2) % (2 * Math.PI);
+      let index = todosPremios.length - Math.floor(finalAngle / arc) - 1;
+      if (index < 0) index = todosPremios.length - 1;
+      
+      // Si NO es premio forzado, asegurar que sea un mensaje "no ganó"
+      if (!esPremioForzado) {
+        while (premiosPrincipales.some(p => p.texto === todosPremios[index].texto)) {
+          index = (index + 1) % todosPremios.length; // Buscar siguiente opción válida
         }
       }
-
-      requestAnimationFrame(animate);
+      
+      premioObtenido = todosPremios[index];
+      mostrarResultado();
     }
+  }
+
+  requestAnimationFrame(animate);
+}
 
     // Función para actualizar el contador en la interfaz
     function actualizarContador() {
