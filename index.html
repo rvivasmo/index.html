@@ -106,11 +106,11 @@
     <div id="formulario">
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" placeholder="Nombre de Usuario.." required>
+        <input type="text" id="nombre" placeholder="Nombre de Usuario." required>
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono:</label>
-        <input type="tel" id="telefono" placeholder="Número de teléfono.." required>
+        <input type="tel" id="telefono" placeholder="Número de teléfono." required>
       </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
@@ -242,7 +242,7 @@
     ctx.rotate(angle + arcParam / 2);
     ctx.textAlign = "right";
     ctx.fillStyle = "#111"; // texto oscuro para mejor contraste
-    ctx.font = `${Math.floor(size / 20)}px Arial`; // más grande
+    ctx.font = `${Math.floor(size / 28)}px Arial`; // más grande
 
     // Eliminar sombra para más nitidez (opcional)
     ctx.shadowColor = "transparent";
