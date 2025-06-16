@@ -280,7 +280,7 @@
       if (esPremioForzado) {
         // Forzar ángulo para premio principal
         const indicePremio = Math.floor(Math.random() * premiosPrincipales.length);
-        const posicionPremio = ruletaNormal.findIndex(p => p.texto === premiosPrincipales[indicePremio].texto);
+        const posicionPremio = todosPremios.findIndex(p => p.texto === premiosPrincipales[indicePremio].texto);
         angle = (posicionPremio * arc + arc/2) * (180/Math.PI);
         angle += 720 * 5; // Vueltas extras para animación
       } else {
@@ -311,7 +311,7 @@
           btnGirar.textContent = "🎯 Girar la ruleta";
           
           let finalAngle = (startAngle + arc / 2) % (2 * Math.PI);
-          let index = ruletaNormal.length - Math.floor(finalAngle / arc) - 1;
+          let index = todosPremios.length - Math.floor(finalAngle / arc) - 1;
           if (index < 0) index = todosPremios.length - 1;
           
           // Si NO es premio forzado, asegurar que sea un mensaje "no ganó"
