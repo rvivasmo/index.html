@@ -105,11 +105,11 @@ canvas {
     <div id="formulario">
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" placeholder="Nombre de Usuario." required>
+        <input type="text" id="nombre" placeholder="Nombre de Usuario.." required>
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono:</label>
-        <input type="tel" id="telefono" placeholder="Número de teléfono." required>
+        <input type="tel" id="telefono" placeholder="Número de teléfono.." required>
       </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
@@ -196,20 +196,23 @@ canvas {
     // Ajustar canvas para móviles
 function ajustarCanvas() {
   const dpr = window.devicePixelRatio || 1;
-  const width = window.innerWidth <= 500 ? 300 : 400;
-  const height = window.innerWidth <= 500 ? 300 : 400;
+  const size = window.innerWidth <= 500 ? 300 : 400; // tamaño en CSS
 
-  canvas.style.width = width + "px";
-  canvas.style.height = height + "px";
+  // Ajustes visuales
+  canvas.style.width = size + 'px';
+  canvas.style.height = size + 'px';
 
-  canvas.width = width * dpr;
-  canvas.height = height * dpr;
+  // Ajustes reales (pixeles del dispositivo)
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
 
-  ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+  // Escalamos el contexto
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.scale(dpr, dpr);
 
   arc = 2 * Math.PI / ruletaNormal.length;
-  dibujarRuleta(ruletaNormal);
+
+  dibujarRuleta(ruletaNormal); // Re-dibuja con el nuevo contexto
 }
 
     window.addEventListener('resize', ajustarCanvas);
@@ -242,7 +245,8 @@ function ajustarCanvas() {
     ctx.rotate(angle + arcParam / 2);
     ctx.textAlign = "right";
     ctx.fillStyle = "#000"; // Color del texto
-    ctx.font = `${Math.floor(size / 28)}px Arial`;
+let fontSize = window.innerWidth <= 500 ? 12 : 16;
+ctx.font = `bold ${fontSize}px sans-serif`;
 
     // Efecto de sombra para mejor visibilidad
     ctx.shadowColor = "rgba(255, 255, 255, 0.7)";
