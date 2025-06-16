@@ -106,11 +106,11 @@
     <div id="formulario">
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" placeholder="Nombre de Usuario." required>
+        <input type="text" id="nombre" placeholder="Nombre de Usuario.." required>
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono:</label>
-        <input type="tel" id="telefono" placeholder="Número de teléfono." required>
+        <input type="tel" id="telefono" placeholder="Número de teléfono.." required>
       </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
@@ -280,7 +280,7 @@
       if (esPremioForzado) {
         // Forzar ángulo para premio principal
         const indicePremio = Math.floor(Math.random() * premiosPrincipales.length);
-        const posicionPremio = todosPremios.findIndex(p => p.texto === premiosPrincipales[indicePremio].texto);
+        const posicionPremio = ruletaNormal.findIndex(p => p.texto === premiosPrincipales[indicePremio].texto);
         angle = (posicionPremio * arc + arc/2) * (180/Math.PI);
         angle += 720 * 5; // Vueltas extras para animación
       } else {
@@ -311,7 +311,7 @@
           btnGirar.textContent = "🎯 Girar la ruleta";
           
           let finalAngle = (startAngle + arc / 2) % (2 * Math.PI);
-          let index = todosPremios.length - Math.floor(finalAngle / arc) - 1;
+          let index = ruletaNormal.length - Math.floor(finalAngle / arc) - 1;
           if (index < 0) index = todosPremios.length - 1;
           
           // Si NO es premio forzado, asegurar que sea un mensaje "no ganó"
@@ -321,7 +321,7 @@
             }
           }
           
-          premioObtenido = todosPremios[index];
+          premioObtenido = ruletaNormal[index];
           mostrarResultado();
         }
       }
