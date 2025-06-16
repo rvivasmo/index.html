@@ -105,11 +105,11 @@ canvas {
     <div id="formulario">
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" placeholder="Nombre de Usuario.." required>
+        <input type="text" id="nombre" placeholder="Nombre de Usuario." required>
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono:</label>
-        <input type="tel" id="telefono" placeholder="Número de teléfono.." required>
+        <input type="tel" id="telefono" placeholder="Número de teléfono." required>
       </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
@@ -194,16 +194,23 @@ canvas {
     const btnGirar = document.getElementById("btnGirar");
 
     // Ajustar canvas para móviles
-    function ajustarCanvas() {
-      if (window.innerWidth <= 500) {
-        canvas.width = 300;
-        canvas.height = 300;
-      } else {
-        canvas.width = 400;
-        canvas.height = 400;
-      }
-      dibujarRuleta(ruletaNormal); // Dibuja ruleta normal con premios mezclados
-    }
+function ajustarCanvas() {
+  const dpr = window.devicePixelRatio || 1;
+  const width = window.innerWidth <= 500 ? 300 : 400;
+  const height = window.innerWidth <= 500 ? 300 : 400;
+
+  canvas.style.width = width + "px";
+  canvas.style.height = height + "px";
+
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+  ctx.scale(dpr, dpr);
+
+  arc = 2 * Math.PI / ruletaNormal.length;
+  dibujarRuleta(ruletaNormal);
+}
 
     window.addEventListener('resize', ajustarCanvas);
     ajustarCanvas();
