@@ -24,14 +24,13 @@
       color: #d63384;
       margin-bottom: 20px;
     }
-    canvas {
-      border: 5px solid #d63384;
-      border-radius: 50%;
-      margin: 20px auto;
-      background-color: #fff0f5;
-      max-width: 100%;
-      height: auto;
-    }
+canvas {
+  display: block;
+  margin: 0 auto;
+  border-radius: 50%;  /* esto es opcional, solo si quieres que sea redondo */
+  background-color: transparent;
+  max-width: 100%;
+}
     #formulario, #ruleta, #mensajeFinal {
       display: none;
       width: 100%;
@@ -106,11 +105,11 @@
     <div id="formulario">
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" placeholder="Nombre de Usuario." required>
+        <input type="text" id="nombre" placeholder="Nombre de Usuario.." required>
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono:</label>
-        <input type="tel" id="telefono" placeholder="Número de teléfono." required>
+        <input type="tel" id="telefono" placeholder="Número de teléfono.." required>
       </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
@@ -196,16 +195,20 @@
 
     // Ajustar canvas para móviles
 function ajustarCanvas() {
-  const dpr = window.devicePixelRatio || 1; // Densidad de píxeles
+  const dpr = window.devicePixelRatio || 1;
   const displaySize = window.innerWidth <= 500 ? 300 : 400;
-  canvas.style.width = displaySize + "px";
-  canvas.style.height = displaySize + "px";
 
+  // Establece el tamaño visible
+  canvas.style.width = `${displaySize}px`;
+  canvas.style.height = `${displaySize}px`;
+
+  // Establece el tamaño interno (más píxeles para nitidez)
   canvas.width = displaySize * dpr;
   canvas.height = displaySize * dpr;
 
-  ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
-  ctx.scale(dpr, dpr); // Escala según DPR
+  // Escala todo lo que se dibuje
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(dpr, dpr);
 
   dibujarRuleta(ruletaNormal);
 }
