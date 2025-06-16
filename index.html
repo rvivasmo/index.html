@@ -108,11 +108,11 @@
     <div id="formulario">
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" placeholder="Nombre de Usuario." required>
+        <input type="text" id="nombre" placeholder="Nombre de Usuario.." required>
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono:</label>
-        <input type="tel" id="telefono" placeholder="Número de teléfono." required>
+        <input type="tel" id="telefono" placeholder="Número de teléfono.." required>
       </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
@@ -212,13 +212,16 @@
     ajustarCanvas();
 
     // Función para dibujar la ruleta
-    function dibujarRuleta(premios = ruletaNormal, arcParam = arc) {
+   function dibujarRuleta(premios = ruletaNormal, arcParam = arc) {
   const size = canvas.width;
   const cx = size / 2;
   const cy = size / 2;
   const radio = size / 2 - 10;
 
+  // Mejorar calidad de renderizado
   ctx.clearRect(0, 0, size, size);
+  ctx.imageSmoothingEnabled = true;
+  ctx.textRendering = "optimizeLegibility";
   
   for (let i = 0; i < premios.length; i++) {
     const angle = startAngle + i * arcParam;
@@ -232,32 +235,69 @@
     ctx.fill();
     ctx.closePath();
 
-    // Dibujar texto girado dentro del segmento
+    // Configuración de texto mejorada
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(angle + arcParam / 2);
     ctx.textAlign = "right";
-    ctx.fillStyle = "#000"; // Color del texto
-    ctx.font = `${Math.floor(size / 28)}px Arial`;
-
-    // Efecto de sombra para mejor visibilidad
-    ctx.shadowColor = "rgba(255, 255, 255, 0.7)";
+    
+    // Aumentar tamaño de fuente y usar fuente más legible
+    const fontSize = Math.max(14, Math.floor(size / 20)); // Tamaño mínimo de 14px
+    ctx.font = `bold ${fontSize}px 'Arial', sans-serif`;
+    
+    // Mejor contraste para el texto
+    const isLightColor = tinycolor(premios[i].color).isLight();
+    ctx.fillStyle = isLightColor ? "#333" : "#fff";
+    
+    // Sombra más efectiva
+    ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
     ctx.shadowOffsetX = 1;
     ctx.shadowOffsetY = 1;
     ctx.shadowBlur = 2;
 
+    // Ajustar posición del texto
     const texto = premios[i].texto;
-    ctx.fillText(texto, radio - 15, 5); // Posición del texto
+    const maxWidth = radio - 30; // Margen más grande
+    const lineHeight = fontSize * 1.2;
+    
+    // Manejar texto largo con saltos de línea
+    wrapText(ctx, texto, radio - 20, 0, maxWidth, lineHeight);
+    
     ctx.restore();
   }
 
-  // Puntero
+  // Puntero más visible
   ctx.beginPath();
-  ctx.fillStyle = "#000";
+  ctx.fillStyle = "#d63384";
+  ctx.strokeStyle = "#fff";
+  ctx.lineWidth = 2;
   ctx.moveTo(cx, 10);
-  ctx.lineTo(cx - 10, 30);
-  ctx.lineTo(cx + 10, 30);
+  ctx.lineTo(cx - 15, 40);
+  ctx.lineTo(cx + 15, 40);
+  ctx.closePath();
   ctx.fill();
+  ctx.stroke();
+}
+
+// Función auxiliar para manejar texto multilínea
+function wrapText(context, text, x, y, maxWidth, lineHeight) {
+  const words = text.split(' ');
+  let line = '';
+  
+  for(let n = 0; n < words.length; n++) {
+    const testLine = line + words[n] + ' ';
+    const metrics = context.measureText(testLine);
+    const testWidth = metrics.width;
+    
+    if (testWidth > maxWidth && n > 0) {
+      context.fillText(line, x, y);
+      line = words[n] + ' ';
+      y += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  context.fillText(line, x, y);
 }
 
     function girarRuleta() {
