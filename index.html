@@ -106,11 +106,11 @@
     <div id="formulario">
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" placeholder="Nombre de Usuario" required>
+        <input type="text" id="nombre" placeholder="Nombre de Usuario." required>
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono:</label>
-        <input type="tel" id="telefono" placeholder="Número de teléfono" required>
+        <input type="tel" id="telefono" placeholder="Número de teléfono." required>
       </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
@@ -139,21 +139,21 @@
 
     // Mensajes para "no ganó" (aparecerán en giros normales)
     const mensajesNoGano = [
-      { texto: "🎀 ¡casi ganas!", color: "#FF3E96" },
-      { texto: "🎈 vuelve a intentarlo", color: "#FFD1DC" },
-      { texto: "🧸 Peluche escondido 😅", color: "#F8BBD0" },
-      { texto: "💌 No ganaste", color: "#F48FB1" },
-      { texto: "🎁 Tu regalo no llega 😬", color: "#FFB6C1" },
-      { texto: "🛍 ¡no te rindas!", color: "#FF82AB" },
-      { texto: "📦 sigue participando", color: "#FFAEB9" },
-      { texto: "🎉 ¡Uy! Hoy no fue tu día", color: "#EE82EE" },
-      { texto: "✨ hoy No hay premio ✨", color: "#FFC1E3" },
-      { texto: "🎂 Aqui no hay regalo", color: "#FFA7C4" },
-      { texto: "💘 Abrazo imaginario 💕", color: "#FFB8D8" },
-      { texto: "🧨 Suerte... cancelada", color: "#FF9BBE" },
-      { texto: "📮 Sigue girando", color: "#FF6EB4" },
-      { texto: "🪄 Tu suerte casi llega", color: "#FF3E96" },
-      { texto: "📷 Ni con foto ganas", color: "#DDA0DD" }
+      { texto: "¡casi ganas! 🎀", color: "#FF3E96" },
+      { texto: "vuelve a intentarlo 🎈", color: "#FFD1DC" },
+      { texto: "Peluche escondido 😅", color: "#F8BBD0" },
+      { texto: "No ganaste 💌", color: "#F48FB1" },
+      { texto: "Tu regalo no llega 🎁", color: "#FFB6C1" },
+      { texto: "¡no te rindas! 🛍", color: "#FF82AB" },
+      { texto: "sigue participando 📦", color: "#FFAEB9" },
+      { texto: "¡Uy! Hoy no fue tu día 🎉", color: "#EE82EE" },
+      { texto: "hoy No hay premio ✨", color: "#FFC1E3" },
+      { texto: "Aqui no hay regalo 🎂", color: "#FFA7C4" },
+      { texto: "Abrazo imaginario 💕", color: "#FFB8D8" },
+      { texto: "Suerte... cancelada 🧨", color: "#FF9BBE" },
+      { texto: "Sigue girando 📮", color: "#FF6EB4" },
+      { texto: "Tu suerte casi llega 🪄", color: "#FF3E96" },
+      { texto: "Ni con foto ganas 📷", color: "#DDA0DD" }
     ];
 
     // Función para mezclar los premios principales entre los mensajes "no ganó"
