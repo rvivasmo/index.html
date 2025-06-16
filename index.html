@@ -1,3 +1,5 @@
+10:53 Lunes 16
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -24,13 +26,14 @@
       color: #d63384;
       margin-bottom: 20px;
     }
-canvas {
-  display: block;
-  margin: 0 auto;
-  border-radius: 50%;  /* esto es opcional, solo si quieres que sea redondo */
-  background-color: transparent;
-  max-width: 100%;
-}
+    canvas {
+      border: 5px solid #d63384;
+      border-radius: 50%;
+      margin: 20px auto;
+      background-color: #fff0f5;
+      max-width: 100%;
+      height: auto;
+    }
     #formulario, #ruleta, #mensajeFinal {
       display: none;
       width: 100%;
@@ -105,11 +108,11 @@ canvas {
     <div id="formulario">
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" placeholder="Nombre de Usuario.." required>
+        <input type="text" id="nombre" placeholder="Nombre de Usuario." required>
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono:</label>
-        <input type="tel" id="telefono" placeholder="Número de teléfono.." required>
+        <input type="tel" id="telefono" placeholder="Número de teléfono." required>
       </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
@@ -194,24 +197,16 @@ canvas {
     const btnGirar = document.getElementById("btnGirar");
 
     // Ajustar canvas para móviles
-function ajustarCanvas() {
-  const dpr = window.devicePixelRatio || 1;
-  const displaySize = window.innerWidth <= 500 ? 300 : 400;
-
-  // Establece el tamaño visible
-  canvas.style.width = `${displaySize}px`;
-  canvas.style.height = `${displaySize}px`;
-
-  // Establece el tamaño interno (más píxeles para nitidez)
-  canvas.width = displaySize * dpr;
-  canvas.height = displaySize * dpr;
-
-  // Escala todo lo que se dibuje
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.scale(dpr, dpr);
-
-  dibujarRuleta(ruletaNormal);
-}
+    function ajustarCanvas() {
+      if (window.innerWidth <= 500) {
+        canvas.width = 300;
+        canvas.height = 300;
+      } else {
+        canvas.width = 400;
+        canvas.height = 400;
+      }
+      dibujarRuleta(ruletaNormal); // Dibuja ruleta normal con premios mezclados
+    }
 
     window.addEventListener('resize', ajustarCanvas);
     ajustarCanvas();
@@ -243,8 +238,8 @@ function ajustarCanvas() {
     ctx.rotate(angle + arcParam / 2);
     ctx.textAlign = "right";
     ctx.fillStyle = "#000"; // Color del texto
-    ctx.font = `${Math.floor(size / 26)}px 'Arial Black', 'Verdana', sans-serif`;
-    
+    ctx.font = `${Math.floor(size / 28)}px Arial`;
+
     // Efecto de sombra para mejor visibilidad
     ctx.shadowColor = "rgba(255, 255, 255, 0.7)";
     ctx.shadowOffsetX = 1;
