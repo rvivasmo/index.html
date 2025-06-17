@@ -106,11 +106,11 @@
     <div id="formulario">
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" placeholder="Nombre de Usuario.." required>
+        <input type="text" id="nombre" placeholder="Nombre de Usuario." required>
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono:</label>
-        <input type="tel" id="telefono" placeholder="Número de teléfono.." required>
+        <input type="tel" id="telefono" placeholder="Número de teléfono." required>
       </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
@@ -179,8 +179,6 @@
 
     // Ruleta normal (con premios principales mezclados)
     const ruletaNormal = mezclarPremios();
-    // Todos los premios (para cuando sea premio forzado)
-    const todosPremios = [...ruletaNormal]; // Ahora ya incluye todo mezclado
     
     // Contador de giros (persistente)
     let contadorGiros = localStorage.getItem('contadorGiros') ? parseInt(localStorage.getItem('contadorGiros')) : 0;
@@ -280,17 +278,25 @@
       if (esPremioForzado) {
         // Forzar ángulo para premio principal
         const indicePremio = Math.floor(Math.random() * premiosPrincipales.length);
-        const posicionPremio = todosPremios.findIndex(p => p.texto === premiosPrincipales[indicePremio].texto);
-        angle = (posicionPremio * arc + arc/2) * (180/Math.PI);
-        angle += 720 * 5; // Vueltas extras para animación
-      } else {
-        // Girar normalmente, pero solo considerar mensajesNoGano
-        const indicesNoGano = todosPremios
-          .map((premio, index) => mensajesNoGano.some(m => m.texto === premio.texto) ? index : -1)
-          .filter(index => index !== -1);
+        const textoPremio = premiosPrincipales[indicePremio].texto;
         
-        const indiceAleatorio = indicesNoGano[Math.floor(Math.random() * indicesNoGano.length)];
-        angle = (indiceAleatorio * arc + arc/2) * (180/Math.PI);
+        // Encuentra el índice en la ruleta **real** (ruletaNormal)
+        const indexPremio = ruletaNormal.findIndex(p => p.texto === textoPremio);
+        
+        // Guarda el índice para usarlo luego
+        let indexPremioSeleccionado = indexPremio;
+        
+        // Calcula el ángulo como antes
+        angle = (indexPremio * arc + arc / 2) * (180 / Math.PI) + 720 * 5;
+      } else {
+        
+        // Girar normalmente, pero solo considerar mensajesNoGano
+       const indicesNoGano = ruletaNormal
+      .map((premio, index) => mensajesNoGano.some(m => m.texto === premio.texto) ? index : -1)
+      .filter(index => index !== -1);
+    
+    const indiceGanador = indicesNoGano[Math.floor(Math.random() * indicesNoGano.length)];
+    angle = (indiceGanador * arc + arc / 2) * (180 / Math.PI) + Math.random() * 720 + 720;
         angle += Math.random() * 720 + 720; // Animación normal
       }
 
@@ -314,17 +320,17 @@
         const angleFinal = startAngle % (2 * Math.PI);
         
         // Calcular el índice del premio según ángulo
-        let index = Math.floor((todosPremios.length - (angleFinal / arc)) % todosPremios.length);
-        if (index < 0) index += todosPremios.length;
+        let index = Math.floor((ruletaNormal.length - (angleFinal / arc)) % ruletaNormal.length);
+        if (index < 0) index += ruletaNormal.length;
           
           // Si NO es premio forzado, asegurar que sea un mensaje "no ganó"
           if (!esPremioForzado) {
-            while (premiosPrincipales.some(p => p.texto === todosPremios[index].texto)) {
-              index = (index + 1) % todosPremios.length; // Buscar siguiente opción válida
+            while (premiosPrincipales.some(p => p.texto === ruletaNormal[index].texto)) {
+              index = (index + 1) % ruletaNormal.length; // Buscar siguiente opción válida
             }
           }
           
-          premioObtenido = todosPremios[index];
+          premioObtenido = ruletaNormal[indexPremioSeleccionado];
           mostrarResultado();
         }
       }
