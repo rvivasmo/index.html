@@ -106,11 +106,11 @@
     <div id="formulario">
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" placeholder="Nombre de Usuario." required>
+        <input type="text" id="nombre" placeholder="Nombre de Usuario.." required>
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono:</label>
-        <input type="tel" id="telefono" placeholder="Número de teléfono." required>
+        <input type="tel" id="telefono" placeholder="Número de teléfono.." required>
       </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
@@ -310,9 +310,8 @@
           btnGirar.disabled = false;
           btnGirar.textContent = "🎯 Girar la ruleta";
           
-          let finalAngle = (startAngle + arc / 2) % (2 * Math.PI);
-          let index = todosPremios.length - Math.floor(finalAngle / arc) - 1;
-          if (index < 0) index = todosPremios.length - 1;
+          let finalAngle = (startAngle + Math.PI * 1.5) % (2 * Math.PI);
+          let index = Math.floor(finalAngle / arc);
           
           // Si NO es premio forzado, asegurar que sea un mensaje "no ganó"
           if (!esPremioForzado) {
