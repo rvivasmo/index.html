@@ -106,11 +106,11 @@
     <div id="formulario">
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" placeholder="Nombre de Usuario." required>
+        <input type="text" id="nombre" placeholder="Nombre de Usuario.." required>
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono:</label>
-        <input type="tel" id="telefono" placeholder="Número de teléfono." required>
+        <input type="tel" id="telefono" placeholder="Número de teléfono.." required>
       </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
@@ -260,83 +260,67 @@
   ctx.fill();
 }
 
-    function girarRuleta() {
-      if (spinning) return;
-      
-      spinning = true;
-      btnGirar.disabled = true;
-      btnGirar.textContent = "Girando...";
+function girarRuleta() {
+  if (spinning) return;
 
-      // Incrementar contador
-      contadorGiros++;
-      localStorage.setItem('contadorGiros', contadorGiros);
+  spinning = true;
+  btnGirar.disabled = true;
+  btnGirar.textContent = "Girando...";
 
-      // Determinar si es el giro 100 (premio forzado)
-      const esPremioForzado = contadorGiros % 100 === 0;
-      
-      let angle;
-      if (esPremioForzado) {
-        // Forzar ángulo para premio principal
-        const indicePremio = Math.floor(Math.random() * premiosPrincipales.length);
-        const textoPremio = premiosPrincipales[indicePremio].texto;
-        
-        // Encuentra el índice en la ruleta **real** (ruletaNormal)
-        const indexPremio = ruletaNormal.findIndex(p => p.texto === textoPremio);
-        
-        // Guarda el índice para usarlo luego
-        let indexPremioSeleccionado = indexPremio;
-        
-        // Calcula el ángulo como antes
-        angle = (indexPremio * arc + arc / 2) * (180 / Math.PI) + 720 * 5;
-      } else {
-        
-        // Girar normalmente, pero solo considerar mensajesNoGano
-       const indicesNoGano = ruletaNormal
+  contadorGiros++;
+  localStorage.setItem('contadorGiros', contadorGiros);
+  actualizarContador();
+
+  const esPremioForzado = contadorGiros % 100 === 0;
+
+  let angle;
+  let indexPremioSeleccionado;
+
+  if (esPremioForzado) {
+    // Seleccionar un premio principal
+    const indicePremio = Math.floor(Math.random() * premiosPrincipales.length);
+    const textoPremio = premiosPrincipales[indicePremio].texto;
+
+    // Buscar ese premio en la ruleta visible
+    indexPremioSeleccionado = ruletaNormal.findIndex(p => p.texto === textoPremio);
+
+    angle = (indexPremioSeleccionado * arc + arc / 2) * (180 / Math.PI) + 720 * 5;
+
+  } else {
+    // Seleccionar solo entre los mensajes "no ganó"
+    const indicesNoGano = ruletaNormal
       .map((premio, index) => mensajesNoGano.some(m => m.texto === premio.texto) ? index : -1)
       .filter(index => index !== -1);
-    
-    const indiceGanador = indicesNoGano[Math.floor(Math.random() * indicesNoGano.length)];
-    angle = (indiceGanador * arc + arc / 2) * (180 / Math.PI) + Math.random() * 720 + 720;
-        angle += Math.random() * 720 + 720; // Animación normal
-      }
 
-      let current = 0;
-      let duration = 4000;
-      const start = performance.now();
+    indexPremioSeleccionado = indicesNoGano[Math.floor(Math.random() * indicesNoGano.length)];
 
-      function animate(time) {
-        let elapsed = time - start;
-        if (elapsed < duration) {
-          current = easeOut(elapsed, 0, angle, duration);
-          startAngle = (current * Math.PI / 180) % (2 * Math.PI);
-          dibujarRuleta(ruletaNormal);
-          requestAnimationFrame(animate);
-        } else {
-          spinning = false;
-          btnGirar.disabled = false;
-          btnGirar.textContent = "🎯 Girar la ruleta";
-          
-        // Ángulo actual en radianes (donde apunta la flecha)
-        const angleFinal = startAngle % (2 * Math.PI);
-        
-        // Calcular el índice del premio según ángulo
-        let index = Math.floor((ruletaNormal.length - (angleFinal / arc)) % ruletaNormal.length);
-        if (index < 0) index += ruletaNormal.length;
-          
-          // Si NO es premio forzado, asegurar que sea un mensaje "no ganó"
-          if (!esPremioForzado) {
-            while (premiosPrincipales.some(p => p.texto === ruletaNormal[index].texto)) {
-              index = (index + 1) % ruletaNormal.length; // Buscar siguiente opción válida
-            }
-          }
-          
-          premioObtenido = ruletaNormal[indexPremioSeleccionado];
-          mostrarResultado();
-        }
-      }
+    angle = (indexPremioSeleccionado * arc + arc / 2) * (180 / Math.PI) + Math.random() * 720 + 720;
+  }
 
+  let current = 0;
+  let duration = 4000;
+  const start = performance.now();
+
+  function animate(time) {
+    let elapsed = time - start;
+    if (elapsed < duration) {
+      current = easeOut(elapsed, 0, angle, duration);
+      startAngle = (current * Math.PI / 180) % (2 * Math.PI);
+      dibujarRuleta(ruletaNormal);
       requestAnimationFrame(animate);
+    } else {
+      spinning = false;
+      btnGirar.disabled = false;
+      btnGirar.textContent = "🎯 Girar la ruleta";
+
+      // Premio ya determinado
+      premioObtenido = ruletaNormal[indexPremioSeleccionado];
+      mostrarResultado();
     }
+  }
+
+  requestAnimationFrame(animate);
+}
 
     // Función para actualizar el contador en la interfaz
     function actualizarContador() {
