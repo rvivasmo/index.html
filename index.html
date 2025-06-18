@@ -106,11 +106,11 @@
     <div id="formulario">
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" placeholder="Nombre de Usuario.." required>
+        <input type="text" id="nombre" placeholder="Nombre de Usuario." required>
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono:</label>
-        <input type="tel" id="telefono" placeholder="Número de teléfono.." required>
+        <input type="tel" id="telefono" placeholder="Número de teléfono." required>
       </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
@@ -318,32 +318,26 @@ actualizarContador();
   let duration = 4000;
   const start = performance.now();
 
-  function animate(time) {
-    let elapsed = time - start;
-    if (elapsed < duration) {
-      current = easeOut(elapsed, 0, angle, duration);
-      startAngle = (current * Math.PI / 180) % (2 * Math.PI);
-      dibujarRuleta(ruletaNormal);
-      requestAnimationFrame(animate);
-    } else {
-      spinning = false;
-      btnGirar.disabled = false;
-      btnGirar.textContent = "🎯 Girar la ruleta";
-
-      // Calcular ángulo final y determinar índice del premio real
-      const angleDeg = (startAngle * 180 / Math.PI) % 360;
-      const degreesPerSegment = 360 / ruletaNormal.length;
-      const adjustedAngle = (360 - angleDeg + degreesPerSegment / 2) % 360;
-      const indexReal = Math.floor(adjustedAngle / degreesPerSegment);
-      
-      // ⚠️ Validación extra: prevenir índice fuera de rango por redondeo
-      const indexSeguro = Math.min(Math.max(indexReal, 0), ruletaNormal.length - 1);
-      
-      // ✅ Guarda el premio correctamente según lo que se dibujó
-      premioObtenido = ruletaNormal[indexSeguro];
-      mostrarResultado();
-    }
+function animate(time) {
+  let elapsed = time - start;
+  if (elapsed < duration) {
+    current = easeOut(elapsed, 0, angle, duration);
+    startAngle = (current * Math.PI / 180) % (2 * Math.PI);
+    dibujarRuleta(ruletaNormal);
+    requestAnimationFrame(animate);
+  } else {
+    spinning = false;
+    btnGirar.disabled = false;
+    btnGirar.textContent = "🎯 Girar la ruleta";
+    
+    // Asegurar que la ruleta termine exactamente en el premio seleccionado
+    startAngle = (angle * Math.PI / 180) % (2 * Math.PI);
+    dibujarRuleta(ruletaNormal);
+    
+    // Pequeña pausa antes de mostrar el resultado
+    setTimeout(mostrarResultado, 500);
   }
+}
 
   requestAnimationFrame(animate);
 }
