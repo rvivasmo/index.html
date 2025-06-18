@@ -106,11 +106,11 @@
     <div id="formulario">
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" placeholder="Nombre de Usuario." required>
+        <input type="text" id="nombre" placeholder="Nombre de Usuario.." required>
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono:</label>
-        <input type="tel" id="telefono" placeholder="Número de teléfono." required>
+        <input type="tel" id="telefono" placeholder="Número de teléfono.." required>
       </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
@@ -373,7 +373,8 @@ function girarRuleta() {
     function mostrarResultado() {
       document.getElementById("ruleta").style.display = "none";
       
-    const esNoGano = mensajesNoGano.some(m => m.id === premioObtenido.id);
+    const idsNoGano = mensajesNoGano.map(m => m.id);
+    const esNoGano = idsNoGano.includes(premioObtenido.id);
     if (esNoGano) {
       mensaje = `<h3>😊 Gracias por participar, ${window.datosUsuario.nombre}</h3>
                  <p>${premioObtenido.texto}</p>
