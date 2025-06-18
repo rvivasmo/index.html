@@ -106,11 +106,11 @@
     <div id="formulario">
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" placeholder="Nombre de Usuario.." required>
+        <input type="text" id="nombre" placeholder="Nombre de Usuario." required>
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono:</label>
-        <input type="tel" id="telefono" placeholder="Número de teléfono.." required>
+        <input type="tel" id="telefono" placeholder="Número de teléfono." required>
       </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
@@ -162,20 +162,25 @@
       const mensajes = [...mensajesNoGano];
       const premios = [...premiosPrincipales];
       
-      // Calculamos cada cuántos mensajes debe ir un premio principal
-      const intervalo = Math.floor(mensajes.length / premios.length);
-      
-      // Insertamos los premios principales en posiciones aleatorias dentro de intervalos
-      for (let i = 0; i < premios.length; i++) {
-        const min = i * intervalo;
-        const max = (i + 1) * intervalo;
-        const posicion = Math.floor(Math.random() * (max - min)) + min;
-        
-        mensajes.splice(posicion, 0, premios[i]);
-      }
-      
-      return mensajes;
+  // Validar unicidad de texto antes de mezclar
+  const textosExistentes = new Set(mensajes.map(m => m.texto));
+  for (const premio of premios) {
+    if (textosExistentes.has(premio.texto)) {
+      console.warn(`Texto duplicado detectado: "${premio.texto}"`);
+      // Opcional: modificar el texto, agregar emoji o detener ejecución
     }
+  }
+
+  const intervalo = Math.floor(mensajes.length / premios.length);
+  for (let i = 0; i < premios.length; i++) {
+    const min = i * intervalo;
+    const max = (i + 1) * intervalo;
+    const posicion = Math.floor(Math.random() * (max - min)) + min;
+    mensajes.splice(posicion, 0, premios[i]);
+  }
+
+  return mensajes;
+}
 
     // Ruleta normal (con premios principales mezclados)
     const ruletaNormal = mezclarPremios();
