@@ -106,11 +106,11 @@
     <div id="formulario">
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" placeholder="Nombre de Usuario." required>
+        <input type="text" id="nombre" placeholder="Nombre de Usuario.." required>
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono:</label>
-        <input type="tel" id="telefono" placeholder="Número de teléfono." required>
+        <input type="tel" id="telefono" placeholder="Número de teléfono.." required>
       </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
@@ -252,12 +252,13 @@
   }
 
   // Puntero
-  ctx.beginPath();
-  ctx.fillStyle = "#000";
-  ctx.moveTo(cx, 10);
-  ctx.lineTo(cx - 10, 30);
-  ctx.lineTo(cx + 10, 30);
-  ctx.fill();
+ctx.beginPath();
+ctx.fillStyle = "#ff1493";
+ctx.moveTo(cx, 0);
+ctx.lineTo(cx - 15, 30);
+ctx.lineTo(cx + 15, 30);
+ctx.closePath();
+ctx.fill();
 }
 
 function girarRuleta() {
