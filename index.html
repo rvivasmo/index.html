@@ -106,11 +106,11 @@
     <div id="formulario">
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" placeholder="Nombre de Usuario.." required>
+        <input type="text" id="nombre" placeholder="Nombre de Usuario." required>
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono:</label>
-        <input type="tel" id="telefono" placeholder="Número de teléfono.." required>
+        <input type="tel" id="telefono" placeholder="Número de teléfono." required>
       </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
@@ -155,6 +155,13 @@
       { id: "m14", texto: "Tu suerte casi llega 🪄", color: "#FF3E96" },
       { id: "m15", texto: "Ni con foto ganas 📷", color: "#DDA0DD" }
     ];
+
+      // ✅ Validación opcional de unicidad de IDs
+      const ids = [...premiosPrincipales, ...mensajesNoGano].map(p => p.id);
+      const idsDuplicados = ids.filter((id, i, arr) => arr.indexOf(id) !== i);
+      if (idsDuplicados.length > 0) {
+        console.warn("IDs duplicados encontrados en los premios/mensajes:", idsDuplicados);
+      }  
 
     // Función para mezclar los premios principales entre los mensajes "no ganó"
     function mezclarPremios() {
