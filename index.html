@@ -130,30 +130,30 @@
 <script>
     // Premios principales (solo aparecerán cada 100 giros)
     const premiosPrincipales = [
-      { id: "p1", texto: "¡Ganaste un peluche!", color: "#FFC0CB" },
-      { id: "p2", texto: "¡Desayuno sorpresa!", color: "#FF69B4" },
-      { id: "p3", texto: "Bono $30.000", color: "#DB7093" },
-      { id: "p4", texto: "Bono $20.000", color: "#FF1493" },
-      { id: "p5", texto: "Bono $10.000", color: "#FF85A2" }
+      { texto: "¡Ganaste un peluche!", color: "#FFC0CB" },
+      { texto: "¡Desayuno sorpresa!", color: "#FF69B4" },
+      { texto: "Bono $30.000", color: "#DB7093" },
+      { texto: "Bono $20.000", color: "#FF1493" },
+      { texto: "Bono $10.000", color: "#FF85A2" }
     ];
 
     // Mensajes para "no ganó" (aparecerán en giros normales)
     const mensajesNoGano = [
-      { id: "m1", texto: "¡casi ganas! 🎀", color: "#FF3E96" },
-      { id: "m2", texto: "vuelve a intentarlo 🎈", color: "#FFD1DC" },
-      { id: "m3", texto: "Peluche escondido 😅", color: "#F8BBD0" },
-      { id: "m4", texto: "No ganaste 💌", color: "#F48FB1" },
-      { id: "m5", texto: "Tu regalo no llega 🎁", color: "#FFB6C1" },
-      { id: "m6", texto: "¡no te rindas! 🛍", color: "#FF82AB" },
-      { id: "m7", texto: "sigue participando 📦", color: "#FFAEB9" },
-      { id: "m8", texto: "Hoy no fue tu día 🎉", color: "#EE82EE" },
-      { id: "m9", texto: "hoy No hay premio ✨", color: "#FFC1E3" },
-      { id: "m10", texto: "Aqui no hay regalo 🎂", color: "#FFA7C4" },
-      { id: "m11", texto: "Abrazo imaginario 💕", color: "#FFB8D8" },
-      { id: "m12", texto: "Suerte... cancelada 🧨", color: "#FF9BBE" },
-      { id: "m13", texto: "Sigue girando 📮", color: "#FF6EB4" },
-      { id: "m14", texto: "Tu suerte casi llega 🪄", color: "#FF3E96" },
-      { id: "m15", texto: "Ni con foto ganas 📷", color: "#DDA0DD" }
+      { texto: "¡casi ganas! 🎀", color: "#FF3E96" },
+      { texto: "vuelve a intentarlo 🎈", color: "#FFD1DC" },
+      { texto: "Peluche escondido 😅", color: "#F8BBD0" },
+      { texto: "No ganaste 💌", color: "#F48FB1" },
+      { texto: "Tu regalo no llega 🎁", color: "#FFB6C1" },
+      { texto: "¡no te rindas! 🛍", color: "#FF82AB" },
+      { texto: "sigue participando 📦", color: "#FFAEB9" },
+      { texto: "Hoy no fue tu día 🎉", color: "#EE82EE" },
+      { texto: "hoy No hay premio ✨", color: "#FFC1E3" },
+      { texto: "Aqui no hay regalo 🎂", color: "#FFA7C4" },
+      { texto: "Abrazo imaginario 💕", color: "#FFB8D8" },
+      { texto: "Suerte... cancelada 🧨", color: "#FF9BBE" },
+      { texto: "Sigue girando 📮", color: "#FF6EB4" },
+      { texto: "Tu suerte casi llega 🪄", color: "#FF3E96" },
+      { texto: "Ni con foto ganas 📷", color: "#DDA0DD" }
     ];
 
     // Función para mezclar los premios principales entre los mensajes "no ganó"
@@ -209,19 +209,18 @@
 
     // Función para dibujar la ruleta
     function dibujarRuleta(premios = ruletaNormal, arcParam = arc) {
-      
-    // Ajuste para alta resolución
-    const ratio = window.devicePixelRatio || 1;
-    canvas.width = canvas.clientWidth * ratio;
-    canvas.height = canvas.clientHeight * ratio;
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-  
-    const size = canvas.clientWidth;
-    const cx = size / 2;
-    const cy = size / 2;
-    const radio = size / 2 - 10;
-  
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Ajuste para alta resolución
+  const ratio = window.devicePixelRatio || 1;
+  canvas.width = canvas.clientWidth * ratio;
+  canvas.height = canvas.clientHeight * ratio;
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+  const size = canvas.clientWidth;
+  const cx = size / 2;
+  const cy = size / 2;
+  const radio = size / 2 - 10;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   
   for (let i = 0; i < premios.length; i++) {
     const angle = startAngle + i * arcParam;
@@ -250,17 +249,17 @@
     const texto = premios[i].texto;
     ctx.fillText(texto, radio - 15, 5);
     ctx.restore();
-    }
+  }
 
   // Puntero
-  ctx.beginPath();
-  ctx.fillStyle = "#ff1493";
-  ctx.moveTo(cx, 0);
-  ctx.lineTo(cx - 15, 30);
-  ctx.lineTo(cx + 15, 30);
-  ctx.closePath();
-  ctx.fill();
-  }
+ctx.beginPath();
+ctx.fillStyle = "#ff1493";
+ctx.moveTo(cx, 0);
+ctx.lineTo(cx - 15, 30);
+ctx.lineTo(cx + 15, 30);
+ctx.closePath();
+ctx.fill();
+}
 
 function girarRuleta() {
   if (spinning) return;
@@ -284,7 +283,7 @@ function girarRuleta() {
     const textoPremio = premiosPrincipales[indicePremio].texto;
 
     // Buscar ese premio en la ruleta visible
-    indexPremioSeleccionado = ruletaNormal.findIndex(p => p.id === premiosPrincipales[indicePremio].id);
+    indexPremioSeleccionado = ruletaNormal.findIndex(p => p.texto === textoPremio);
 
     angle = (indexPremioSeleccionado * arc + arc / 2) * (180 / Math.PI) + 720 * 5;
 
@@ -369,16 +368,16 @@ function girarRuleta() {
     function mostrarResultado() {
       document.getElementById("ruleta").style.display = "none";
       
-const esNoGano = mensajesNoGano.some(m => m.id === premioObtenido.id);
-if (esNoGano) {
-  mensaje = `<h3>😊 Gracias por participar, ${window.datosUsuario.nombre}</h3>
-             <p>${premioObtenido.texto}</p>
-             <p>Vuelve a intentarlo en otra oportunidad</p>`;
-} else {
-  mensaje = `<h3>🎉 ¡Felicidades ${window.datosUsuario.nombre}!</h3>
-             <p>${premioObtenido.texto}</p>
-             <p>Nos pondremos en contacto contigo pronto.</p>`;
-}
+      let mensaje = "";
+      if (mensajesNoGano.some(msg => msg.texto === premioObtenido.texto)) {
+        mensaje = `<h3>😊 Gracias por participar, ${window.datosUsuario.nombre}</h3>
+                   <p>${premioObtenido.texto}</p>
+                   <p>Vuelve a intentarlo en otra oportunidad</p>`;
+      } else {
+        mensaje = `<h3>🎉 ¡Felicidades ${window.datosUsuario.nombre}!</h3>
+                   <p>${premioObtenido.texto}</p>
+                   <p>Nos pondremos en contacto contigo pronto.</p>`;
+      }
       
       document.getElementById("mensajeFinal").innerHTML = mensaje;
       document.getElementById("mensajeFinal").style.display = "block";
@@ -398,7 +397,6 @@ if (esNoGano) {
       for (const key in datos) {
         params.append(key, datos[key]);
       }
-
 
       fetch("https://script.google.com/macros/s/AKfycbxJnyIoOgNQGrXudraKp9pt9QVcgxzEI6F3ga1uziAU_78BciNcxzyqRP2GzQi36TNM/exec", {
         method: "POST",
