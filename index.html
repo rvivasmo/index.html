@@ -106,11 +106,11 @@
     <div id="formulario">
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" placeholder="Nombre de Usuario.." required>
+        <input type="text" id="nombre" placeholder="Nombre de Usuario." required>
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono:</label>
-        <input type="tel" id="telefono" placeholder="Número de teléfono.." required>
+        <input type="tel" id="telefono" placeholder="Número de teléfono." required>
       </div>
       <button id="btnEnviar" onclick="enviarFormulario()">Enviar y girar ruleta</button>
     </div>
@@ -331,9 +331,10 @@ actualizarContador();
       btnGirar.textContent = "🎯 Girar la ruleta";
 
       // Calcular ángulo final y determinar índice del premio real
-      const totalAngle = current % 360;
-      const gradosPorSegmento = 360 / ruletaNormal.length;
-      const indexReal = Math.floor((360 - totalAngle + gradosPorSegmento / 2) % 360 / gradosPorSegmento);
+const angleDeg = (startAngle * 180 / Math.PI) % 360;
+const degreesPerSegment = 360 / ruletaNormal.length;
+const adjustedAngle = (360 - angleDeg + degreesPerSegment / 2) % 360;
+const indexReal = Math.floor(adjustedAngle / degreesPerSegment);
       
       premioObtenido = ruletaNormal[indexReal];
       mostrarResultado();
