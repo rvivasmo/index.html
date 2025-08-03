@@ -147,7 +147,7 @@
       { id: "m9", texto: "hoy No hay premio ✨", color: "#FFC1E3" },
       { id: "m10", texto: "Aqui no hay regalo 🎂", color: "#FFA7C4" },
       { id: "m11", texto: "Abrazo imaginario 💕", color: "#FFB8D8" },
-      { id: "m12", texto: "Suerte... cancelada �", color: "#FF9BBE" },
+      { id: "m12", texto: "Suerte... cancelada  ", color: "#FF9BBE" },
       { id: "m13", texto: "Sigue girando 📮", color: "#FF6EB4" },
       { id: "m14", texto: "Tu suerte casi llega 🪄", color: "#FF3E96" },
       { id: "m15", texto: "Ni con foto ganas 📷", color: "#DDA0DD" }
@@ -249,77 +249,64 @@
     }
 
 function girarRuleta() {
-  if (spinning) return;
+    if (spinning) return;
 
-  spinning = true;
-  btnGirar.disabled = true;
-  btnGirar.textContent = "Girando...";
+    spinning = true;
+    btnGirar.disabled = true;
+    btnGirar.textContent = "Girando...";
 
-  contadorGiros++;
-  if (contadorGiros >= 100) {
-    contadorGiros = 0;
-  }
-  localStorage.setItem('contadorGiros', contadorGiros);
-
-  const esPremioForzado = contadorGiros === 0;
-  let indexPremioSeleccionado;
-
-  // 🔄 Si es premio forzado, regenerar ruleta con premio principal asegurado
-  if (esPremioForzado) {
-    const nuevaRuleta = mezclarPremios();
-    ruletaNormal.length = 0;
-    nuevaRuleta.forEach(p => ruletaNormal.push(p));
-
-    const indicePremio = Math.floor(Math.random() * premiosPrincipales.length);
-    const idPremio = premiosPrincipales[indicePremio].id;
-    indexPremioSeleccionado = ruletaNormal.findIndex(p => p.id === idPremio);
-
-    if (indexPremioSeleccionado === -1) {
-      alert("Error al seleccionar premio principal. Por favor, intenta de nuevo.");
-      spinning = false;
-      btnGirar.disabled = false;
-      btnGirar.textContent = "🎯 Girar la ruleta";
-      return;
+    contadorGiros++;
+    if (contadorGiros >= 100) {
+      contadorGiros = 0;
     }
-  } else {
-    const indicesNoGano = ruletaNormal
-      .map((premio, index) => mensajesNoGano.some(m => m.texto === premio.texto) ? index : -1)
-      .filter(index => index !== -1);
+    localStorage.setItem('contadorGiros', contadorGiros);
 
-    indexPremioSeleccionado = indicesNoGano[Math.floor(Math.random() * indicesNoGano.length)];
-  }
+    const esPremioForzado = contadorGiros === 0;
+    let indexPremioSeleccionado;
 
-  premioObtenido = ruletaNormal[indexPremioSeleccionado];
-
-  const vueltasExtra = 5;
-  const anguloFinal = (3 * Math.PI / 2) - (indexPremioSeleccionado * arc + arc / 2);
-  const anguloAnimacion = vueltasExtra * 2 * Math.PI + anguloFinal;
-
-  let current = 0;
-  let duration = 4000;
-  const start = performance.now();
-
-  console.log(`🎯 Giro número: ${contadorGiros} | Premio forzado: ${esPremioForzado} | Premio: ${premioObtenido.texto}`);
-
-  function animate(time) {
-    let elapsed = time - start;
-    if (elapsed < duration) {
-      current = easeOut(elapsed, 0, anguloAnimacion, duration);
-      startAngle = current % (2 * Math.PI);
-      dibujarRuleta(ruletaNormal);
-      requestAnimationFrame(animate);
+    if (esPremioForzado) {
+      const indicePremio = Math.floor(Math.random() * premiosPrincipales.length);
+      indexPremioSeleccionado = ruletaNormal.findIndex(p => p.id === premiosPrincipales[indicePremio].id);
     } else {
-      spinning = false;
-      btnGirar.disabled = false;
-      btnGirar.textContent = "🎯 Girar la ruleta";
-      startAngle = anguloFinal % (2 * Math.PI);
-      dibujarRuleta(ruletaNormal);
-      setTimeout(mostrarResultado, 500);
+      const indicesNoGano = ruletaNormal
+        .map((premio, index) => mensajesNoGano.some(m => m.texto === premio.texto) ? index : -1)
+        .filter(index => index !== -1);
+      indexPremioSeleccionado = indicesNoGano[Math.floor(Math.random() * indicesNoGano.length)];
     }
-  }
 
-  requestAnimationFrame(animate);
-}
+    // Asigna el premio obtenido aquí y úsalo para mostrar el mensaje final
+    premioObtenido = ruletaNormal[indexPremioSeleccionado];
+
+    // Calcula el ángulo final al que debe llegar la ruleta
+    // La flecha siempre apunta hacia arriba (0 radianes), así que el segmento ganador debe quedar alineado ahí.
+    // Corregimos el startAngle para que el segmento ganador quede arriba
+    const vueltasExtra = 5; // número de vueltas completas antes de detenerse
+    const anguloFinal = (3 * Math.PI / 2) - (indexPremioSeleccionado * arc + arc / 2);
+    const anguloAnimacion = vueltasExtra * 2 * Math.PI + anguloFinal;
+
+    let current = 0;
+    let duration = 4000;
+    const start = performance.now();
+
+    function animate(time) {
+      let elapsed = time - start;
+      if (elapsed < duration) {
+        current = easeOut(elapsed, 0, anguloAnimacion, duration);
+        startAngle = current % (2 * Math.PI);
+        dibujarRuleta(ruletaNormal);
+        requestAnimationFrame(animate);
+      } else {
+        spinning = false;
+        btnGirar.disabled = false;
+        btnGirar.textContent = "🎯 Girar la ruleta";
+        startAngle = anguloFinal % (2 * Math.PI);
+        dibujarRuleta(ruletaNormal);
+        setTimeout(mostrarResultado, 500);
+      }
+    }
+
+    requestAnimationFrame(animate);
+  }
 
     // Efecto de animación
     function easeOut(t, b, c, d) {
